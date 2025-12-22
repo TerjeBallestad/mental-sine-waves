@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { Play, Pause, RotateCcw, Sparkles, Info } from "lucide-react";
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  Sparkles,
+  Info,
+  ArrowRight,
+} from "lucide-react";
 import {
   activities,
   characters,
+  emptyWave,
   type Activity,
   type ActivityRequirements,
   type Character,
@@ -12,6 +20,9 @@ import {
 } from "./Data";
 
 const ResonanceSystem = () => {
+  const timeStep = 0.15;
+  const timeInterval = 100; // ms
+
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedChar, setSelectedChar] = useState(0);
@@ -19,12 +30,17 @@ const ResonanceSystem = () => {
   const [recentRewards, setRecentRewards] = useState(Array<RewardData>());
   const [showMapping, setShowMapping] = useState(false);
   const [currentResonance, setCurrentResonance] = useState(0);
+  const [charParams, setCharParams] = useState(emptyWave);
+  const [actParams, setActParams] = useState(emptyWave);
 
-  // Convert traits to wave parameters
+  /**
+   *Convert traits to wave parameters
+   */
   const traitsToWaveParams = ({
+    attentionSpan,
     convergentThinking,
     divergentThinking,
-    workingMemory: openness,
+    processingSpeed,
     workingMemory,
   }: ActivityRequirements | CharacterTraits) => {
     // Mental Stamina → Frequency (higher stamina = faster, more energetic rhythm)
@@ -33,14 +49,17 @@ const ResonanceSystem = () => {
 
     // Divergent Thinking → Harmonic Complexity
     const divergence = divergentThinking / 100;
-    const frequency = 0.2 + (divergence / 100) * 0.8;
+    const frequency = 0.2 + (processingSpeed / 100) * 6;
+
     console.log("Divergence:", divergence);
     const harmonics = [
       (convergentThinking * 0.2) / 100,
       (divergentThinking * 5) / 100, // Second harmonic
+      Math.sign(Math.sin(Math.PI * 2 * attentionSpan * time)),
     ];
 
     // Openness → Phase offset (how they start their cycle)
+    const openness = divergentThinking; // Using divergent thinking as a proxy for openness
     const phase = (openness / 100) * Math.PI;
 
     // Processing Speed affects overall wave smoothness
@@ -50,27 +69,28 @@ const ResonanceSystem = () => {
     return { frequency, amplitude, harmonics, phase, smoothness };
   };
 
-  // Generate wave value at time t
-  const generateWave = (
-    { harmonics, smoothness }: WaveDefiniton,
-    t: number,
-  ) => {
+  /**
+   * Generate wave value at time t
+   */
+  const generateWave = ({ harmonics, frequency }: WaveDefiniton, t: number) => {
     let value = 0;
     let totalHarmonics = 0;
 
-    harmonics.forEach((harmonic) => {
-      // const freq = frequency * (i + 1);
-      value += Math.sin(harmonic * t);
+    harmonics.forEach((harmonic, i) => {
+      const freq = frequency * (i + 1);
+      value += Math.sin(harmonic * t * freq);
       totalHarmonics++;
     });
 
     // Normalize and apply amplitude
     // return ((amplitude * value) / totalHarmonics) * smoothness;
     // return (Math.sin(6 * t) + Math.sin(amplitude * t + 43 * 77)) / 2;
-    return (value / totalHarmonics) * smoothness;
+    return value / totalHarmonics;
   };
 
-  // Calculate how well character traits match activity requirements
+  /**
+   *Calculate how well character traits match activity requirements
+   */
   const calculateResonance = useCallback(
     (
       charTraits: CharacterTraits,
@@ -79,8 +99,11 @@ const ResonanceSystem = () => {
     ) => {
       const charParams = traitsToWaveParams(charTraits);
       const actParams = traitsToWaveParams(actRequirements);
+      setCharParams(charParams);
+      setActParams(actParams);
       const charWave = generateWave(charParams, t);
       const actWave = generateWave(actParams, t);
+      console.log("Char Wave:", charWave, "Act Wave:", actWave);
 
       // Wave alignment (how close they are at this moment)
       const difference = Math.abs(charWave - actWave);
@@ -94,28 +117,30 @@ const ResonanceSystem = () => {
     [],
   );
 
-  // Check interest bonus
+  /**
+   * Check interest bonus
+   */
   const hasInterestBonus = (char: Character, activity: Activity) => {
     return activity.interestBonus.some((interest: string) =>
       char.interests.includes(interest),
     );
   };
 
-  // Generate reward based on resonance
+  /**
+   *Generate reward based on resonance
+   */
   const generateReward = useCallback(
-    (char: Character, activity: Activity, resonance: number) => {
+    (_1: Character, _: Activity, resonance: number) => {
       // Base reward from resonance (30-100 range)
-      const baseReward = 30 + resonance * 70;
+      const baseReward = resonance * 100;
 
       // Interest bonus: flat +20 points
-      const interestBonus = hasInterestBonus(char, activity) ? 20 : 0;
+      // const interestBonus = hasInterestBonus(char, activity) ? 20 : 0;
+      const interestBonus = 0;
 
       // Add small random variation (±10%) - natural performance fluctuation
-      const variation = (Math.random() - 0.5) * 0.2;
-      const finalReward = Math.max(
-        0,
-        (baseReward + interestBonus) * (1 + variation),
-      );
+      // const variation = (Math.random() - 0.5) * 0.2;
+      const finalReward = Math.max(0, baseReward + interestBonus);
 
       return {
         amount: Math.round(finalReward),
@@ -131,39 +156,41 @@ const ResonanceSystem = () => {
     if (!isRunning) return;
 
     const interval = setInterval(() => {
-      setTime((t) => t + 0.15);
-
-      const char = characters[selectedChar];
-      const activity = activities[selectedActivity];
-      const resonance = calculateResonance(
-        char.traits,
-        activity.requirements,
-        time,
-      );
-      setCurrentResonance(resonance);
-      const reward = generateReward(char, activity, resonance);
-
-      setRecentRewards((prev) => [
-        {
-          value: reward.amount,
-          base: reward.base,
-          bonus: reward.bonus,
-          time: Date.now(),
-          resonance: reward.resonance,
-        },
-        ...prev.slice(0, 50),
-      ]);
-    }, 50);
+      setTime((t) => t + timeStep);
+    }, timeInterval);
 
     return () => clearInterval(interval);
+  }, [isRunning]);
+  useEffect(() => {
+    const char = characters[selectedChar];
+    const activity = activities[selectedActivity];
+    const resonance = calculateResonance(
+      char.traits,
+      activity.requirements,
+      time,
+    );
+    setCurrentResonance(resonance);
+    const reward = generateReward(char, activity, resonance);
+
+    setRecentRewards((prev) => [
+      {
+        value: reward.amount,
+        base: reward.base,
+        bonus: reward.bonus,
+        time: Date.now(),
+        resonance: reward.resonance,
+      },
+      ...prev.slice(0, 50),
+    ]);
   }, [
     calculateResonance,
     generateReward,
-    isRunning,
     selectedActivity,
     selectedChar,
     time,
   ]);
+
+  console.log("Rendering App at time:", time);
 
   const char = characters[selectedChar];
   const activity = activities[selectedActivity];
@@ -172,22 +199,20 @@ const ResonanceSystem = () => {
 
   // Generate wave visualization
   const points = 400;
-  const charParams = traitsToWaveParams(char.traits);
-  const actParams = traitsToWaveParams(activity.requirements);
 
   const charWaveData = Array.from({ length: points }, (_, i) => {
-    const t = time + (i / points) * 12;
+    const t = time - (i / points) * 12;
     return {
-      x: i,
-      y: 50 + generateWave(charParams, t) * 35,
+      x: 400 - i,
+      y: 50 + generateWave(charParams, t) * 50,
     };
   });
 
   const actWaveData = Array.from({ length: points }, (_, i) => {
-    const t = time + (i / points) * 12;
+    const t = time - (i / points) * 12;
     return {
-      x: i,
-      y: 50 + generateWave(actParams, t) * 35,
+      x: 400 - i,
+      y: 50 + generateWave(actParams, t) * 50,
     };
   });
 
@@ -332,9 +357,9 @@ const ResonanceSystem = () => {
         </h2>
         <svg viewBox="0 0 400 100" className="w-full h-48 bg-gray-50 rounded">
           <line
-            x1="0"
+            x1="-50"
             y1="50"
-            x2="200"
+            x2="450"
             y2="50"
             stroke="#e5e7eb"
             strokeWidth="1"
@@ -406,6 +431,13 @@ const ResonanceSystem = () => {
             >
               <RotateCcw className="w-4 h-4" />
               Reset
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
+              onClick={() => setTime((prev) => prev + timeStep)}
+            >
+              Step
+              <ArrowRight className="w-4 h-4 text-gray-400" />
             </button>
           </div>
         </div>

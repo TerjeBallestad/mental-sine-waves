@@ -37,6 +37,14 @@ export type WaveDefiniton = {
   smoothness: number;
 };
 
+export const emptyWave: WaveDefiniton = {
+  frequency: 0,
+  amplitude: 0,
+  harmonics: Array<number>(),
+  phase: 0,
+  smoothness: 0,
+};
+
 export type Character = {
   name: string;
   color: string;
@@ -59,12 +67,12 @@ export const characters: Character[] = [
     name: "Test Dummy",
     color: "#f0f",
     traits: {
-      attentionSpan: 0,
-      processingSpeed: 0,
+      attentionSpan: 50,
+      processingSpeed: 100,
       workingMemory: 1,
       mentalStamina: 0,
-      divergentThinking: 100,
-      convergentThinking: 100,
+      divergentThinking: 10,
+      convergentThinking: 1,
       conscientiousness: 0,
       openness: 0,
       stability: 0,
@@ -173,7 +181,7 @@ export const activities: Activity[] = [
     requirements: {
       mentalStamina: 50, // Moderate sustained effort
       convergentThinking: 60, // Consistent execution
-      divergentThinking: 20, // Don't need creativity
+      divergentThinking: 100, // Don't need creativity
       attentionSpan: 50,
       processingSpeed: 40,
       workingMemory: 30, // Prefer consistency
