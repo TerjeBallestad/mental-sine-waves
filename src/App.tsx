@@ -18,44 +18,56 @@ const ResonanceSystem = () => {
   const [selectedActivity, setSelectedActivity] = useState(0);
   const [recentRewards, setRecentRewards] = useState(Array<RewardData>());
   const [showMapping, setShowMapping] = useState(false);
+  const [currentResonance, setCurrentResonance] = useState(0);
 
   // Convert traits to wave parameters
-  const traitsToWaveParams = (traits: ActivityRequirements) => {
+  const traitsToWaveParams = ({
+    convergentThinking,
+    divergentThinking,
+    workingMemory: openness,
+    workingMemory,
+  }: ActivityRequirements | CharacterTraits) => {
     // Mental Stamina → Frequency (higher stamina = faster, more energetic rhythm)
-    const frequency = 0.2 + (traits.mentalStamina / 100) * 0.8;
 
     // Convergent Thinking → Amplitude (focused output strength)
-    const amplitude = 0.3 + (traits.convergentThinking / 100) * 0.7;
 
     // Divergent Thinking → Harmonic Complexity
-    const divergence = traits.divergentThinking / 100;
+    const divergence = divergentThinking / 100;
+    const frequency = 0.2 + (divergence / 100) * 0.8;
+    console.log("Divergence:", divergence);
     const harmonics = [
-      1.0,
-      divergence * 0.5, // Second harmonic
-      divergence * 0.25, // Third harmonic
+      (convergentThinking * 0.2) / 100,
+      (divergentThinking * 5) / 100, // Second harmonic
     ];
 
     // Openness → Phase offset (how they start their cycle)
-    const phase = (traits.openness / 100) * Math.PI;
+    const phase = (openness / 100) * Math.PI;
 
     // Processing Speed affects overall wave smoothness
-    const smoothness = traits.processingSpeed / 100;
+    const smoothness = workingMemory / 100;
+    const amplitude = convergentThinking / 100;
 
     return { frequency, amplitude, harmonics, phase, smoothness };
   };
 
   // Generate wave value at time t
-  const generateWave = (params: WaveDefiniton, t: number) => {
+  const generateWave = (
+    { harmonics, smoothness }: WaveDefiniton,
+    t: number,
+  ) => {
     let value = 0;
-    const totalHarmonics = params.harmonics.reduce((a, b) => a + b, 0);
+    let totalHarmonics = 0;
 
-    params.harmonics.forEach((harmonic: number, i: number) => {
-      const freq = params.frequency * (i + 1);
-      value += harmonic * Math.sin(freq * t + params.phase);
+    harmonics.forEach((harmonic) => {
+      // const freq = frequency * (i + 1);
+      value += Math.sin(harmonic * t);
+      totalHarmonics++;
     });
 
     // Normalize and apply amplitude
-    return ((params.amplitude * value) / totalHarmonics) * params.smoothness;
+    // return ((amplitude * value) / totalHarmonics) * smoothness;
+    // return (Math.sin(6 * t) + Math.sin(amplitude * t + 43 * 77)) / 2;
+    return (value / totalHarmonics) * smoothness;
   };
 
   // Calculate how well character traits match activity requirements
@@ -65,50 +77,17 @@ const ResonanceSystem = () => {
       actRequirements: ActivityRequirements,
       t: number,
     ) => {
-      const charWave = generateWave(traitsToWaveParams(charTraits), t);
-      const actWave = generateWave(traitsToWaveParams(actRequirements), t);
+      const charParams = traitsToWaveParams(charTraits);
+      const actParams = traitsToWaveParams(actRequirements);
+      const charWave = generateWave(charParams, t);
+      const actWave = generateWave(actParams, t);
 
       // Wave alignment (how close they are at this moment)
       const difference = Math.abs(charWave - actWave);
-      const charParams = traitsToWaveParams(charTraits);
-      const actParams = traitsToWaveParams(actRequirements);
-      const maxDiff = charParams.amplitude + actParams.amplitude;
-      const waveAlignment = 1 - difference / maxDiff;
-
-      // Trait compatibility (how similar their overall patterns are)
-      const freqMatch =
-        1 - Math.abs(charParams.frequency - actParams.frequency) / 1.0;
-      const ampMatch =
-        1 - Math.abs(charParams.amplitude - actParams.amplitude) / 1.0;
-      // const phaseMatch =
-      //   1 - Math.abs(charParams.phase - actParams.phase) / Math.PI;
-
-      // Key trait alignment
-      const staminaMatch =
-        1 -
-        Math.abs(charTraits.mentalStamina - actRequirements.mentalStamina) /
-          100;
-      const convergentMatch =
-        1 -
-        Math.abs(
-          charTraits.convergentThinking - actRequirements.convergentThinking,
-        ) /
-          100;
-      const divergentMatch =
-        1 -
-        Math.abs(
-          charTraits.divergentThinking - actRequirements.divergentThinking,
-        ) /
-          100;
+      const waveAlignment = 1 - difference;
 
       // Weighted combination
-      const resonance =
-        waveAlignment * 0.25 + // Moment-to-moment fit
-        freqMatch * 0.15 + // Rhythm compatibility
-        ampMatch * 0.1 + // Output style match
-        staminaMatch * 0.2 + // Stamina alignment
-        convergentMatch * 0.15 + // Focus match
-        divergentMatch * 0.15; // Creativity match
+      const resonance = waveAlignment;
 
       return Math.max(0, Math.min(1, resonance));
     },
@@ -161,6 +140,7 @@ const ResonanceSystem = () => {
         activity.requirements,
         time,
       );
+      setCurrentResonance(resonance);
       const reward = generateReward(char, activity, resonance);
 
       setRecentRewards((prev) => [
@@ -171,9 +151,9 @@ const ResonanceSystem = () => {
           time: Date.now(),
           resonance: reward.resonance,
         },
-        ...prev.slice(0, 14),
+        ...prev.slice(0, 50),
       ]);
-    }, 500);
+    }, 50);
 
     return () => clearInterval(interval);
   }, [
@@ -187,15 +167,11 @@ const ResonanceSystem = () => {
 
   const char = characters[selectedChar];
   const activity = activities[selectedActivity];
-  const currentResonance = calculateResonance(
-    char.traits,
-    activity.requirements,
-    time,
-  );
+
   const hasBonus = hasInterestBonus(char, activity);
 
   // Generate wave visualization
-  const points = 200;
+  const points = 400;
   const charParams = traitsToWaveParams(char.traits);
   const actParams = traitsToWaveParams(activity.requirements);
 
@@ -354,7 +330,7 @@ const ResonanceSystem = () => {
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
           Mental Rhythm Patterns (Hidden from Player)
         </h2>
-        <svg viewBox="0 0 200 100" className="w-full h-48 bg-gray-50 rounded">
+        <svg viewBox="0 0 400 100" className="w-full h-48 bg-gray-50 rounded">
           <line
             x1="0"
             y1="50"

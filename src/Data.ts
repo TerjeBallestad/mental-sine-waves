@@ -18,7 +18,7 @@ export type ActivityRequirements = {
   divergentThinking: number;
   attentionSpan: number;
   processingSpeed: number;
-  openness: number;
+  workingMemory: number;
 };
 
 export type Activity = {
@@ -55,6 +55,25 @@ export type RewardData = {
 
 // Characters with cognitive and personality traits
 export const characters: Character[] = [
+  {
+    name: "Test Dummy",
+    color: "#f0f",
+    traits: {
+      attentionSpan: 0,
+      processingSpeed: 0,
+      workingMemory: 1,
+      mentalStamina: 0,
+      divergentThinking: 100,
+      convergentThinking: 100,
+      conscientiousness: 0,
+      openness: 0,
+      stability: 0,
+      sociability: 0,
+      assertiveness: 0,
+    },
+    interests: ["routine", "observation"],
+    description: "Balanced, neutral character for testing",
+  },
   {
     name: "Elling",
     color: "#3b82f6",
@@ -117,25 +136,6 @@ export const characters: Character[] = [
     interests: ["self-discovery", "social-dynamics", "independence"],
     description: "Dynamic, adaptable, thrives on variety",
   },
-  {
-    name: "Test Dummy",
-    color: "#f0f",
-    traits: {
-      attentionSpan: 0,
-      processingSpeed: 0,
-      workingMemory: 0,
-      mentalStamina: 0,
-      divergentThinking: 0,
-      convergentThinking: 0,
-      conscientiousness: 0,
-      openness: 0,
-      stability: 0,
-      sociability: 0,
-      assertiveness: 0,
-    },
-    interests: ["routine", "observation"],
-    description: "Balanced, neutral character for testing",
-  },
 ];
 
 export const activities: Activity[] = [
@@ -148,7 +148,7 @@ export const activities: Activity[] = [
       divergentThinking: 40, // Some creativity helps
       attentionSpan: 75,
       processingSpeed: 50,
-      openness: 45,
+      workingMemory: 45,
     },
     interestBonus: ["writing", "observation"],
     description: "Detailed work requiring focus and organization",
@@ -162,7 +162,7 @@ export const activities: Activity[] = [
       divergentThinking: 70, // Need to adapt to people
       attentionSpan: 60,
       processingSpeed: 70, // Quick reactions
-      openness: 80, // Must be flexible
+      workingMemory: 80, // Must be flexible
     },
     interestBonus: ["helping", "social-dynamics"],
     description: "High energy, varied interactions",
@@ -176,7 +176,7 @@ export const activities: Activity[] = [
       divergentThinking: 20, // Don't need creativity
       attentionSpan: 50,
       processingSpeed: 40,
-      openness: 30, // Prefer consistency
+      workingMemory: 30, // Prefer consistency
     },
     interestBonus: ["routine", "cooking"],
     description: "Consistent, predictable rhythm",
@@ -190,7 +190,7 @@ export const activities: Activity[] = [
       divergentThinking: 85, // High creativity required
       attentionSpan: 65,
       processingSpeed: 60,
-      openness: 90, // Must think outside box
+      workingMemory: 90, // Must think outside box
     },
     interestBonus: ["self-discovery", "observation"],
     description: "Bursts of insight, unpredictable flow",
