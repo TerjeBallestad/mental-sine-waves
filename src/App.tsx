@@ -18,6 +18,7 @@ import {
   type RewardData,
   type WaveDefiniton,
 } from "./Data";
+import { Wave } from "./Wave";
 
 const ResonanceSystem = () => {
   const timeStep = 0.15;
@@ -32,17 +33,35 @@ const ResonanceSystem = () => {
   const [currentResonance, setCurrentResonance] = useState(0);
   const [charParams, setCharParams] = useState(emptyWave);
   const [actParams, setActParams] = useState(emptyWave);
+  const [currentAttentionSpan, setCurrentAttentionSpan] = useState(0);
+  const [currentConvergentThinking, setCurrentConvergentThinking] = useState(0);
+  const [currentDivergentThinking, setCurrentDivergentThinking] = useState(0);
+
+  const makeAttentionSpanWave = (value: number, t: number) => {
+    return Math.sign(Math.sin((value / 100) * 0.3 * t));
+  };
+
+  const makeDivergentThinkingWave = (value: number, t: number) => {
+    return Math.sin((value / 100) * 77 * t);
+  };
+
+  const makeConvergentThinkingWave = (value: number, t: number) => {
+    return Math.sin((value / 100) * 6 * t);
+  };
 
   /**
    *Convert traits to wave parameters
    */
-  const traitsToWaveParams = ({
-    attentionSpan,
-    convergentThinking,
-    divergentThinking,
-    processingSpeed,
-    workingMemory,
-  }: ActivityRequirements | CharacterTraits) => {
+  const traitsToWaveParams = (
+    {
+      attentionSpan,
+      convergentThinking,
+      divergentThinking,
+      processingSpeed,
+      workingMemory,
+    }: ActivityRequirements | CharacterTraits,
+    t: number,
+  ) => {
     // Mental Stamina → Frequency (higher stamina = faster, more energetic rhythm)
 
     // Convergent Thinking → Amplitude (focused output strength)
@@ -53,9 +72,9 @@ const ResonanceSystem = () => {
 
     console.log("Divergence:", divergence);
     const harmonics = [
-      (convergentThinking * 0.2) / 100,
-      (divergentThinking * 5) / 100, // Second harmonic
-      Math.sign(Math.sin(Math.PI * 2 * attentionSpan * time)),
+      makeConvergentThinkingWave(convergentThinking, t),
+      makeDivergentThinkingWave(divergentThinking, t),
+      makeAttentionSpanWave(attentionSpan, t),
     ];
 
     // Openness → Phase offset (how they start their cycle)
@@ -72,13 +91,50 @@ const ResonanceSystem = () => {
   /**
    * Generate wave value at time t
    */
-  const generateWave = ({ harmonics, frequency }: WaveDefiniton, t: number) => {
+  const generateWave = ({ harmonics }: WaveDefiniton) => {
     let value = 0;
     let totalHarmonics = 0;
 
-    harmonics.forEach((harmonic, i) => {
-      const freq = frequency * (i + 1);
-      value += Math.sin(harmonic * t * freq);
+    harmonics.forEach((harmonic) => {
+      value += harmonic;
+      totalHarmonics++;
+    });
+
+    // Normalize and apply amplitude
+    // return ((amplitude * value) / totalHarmonics) * smoothness;
+    // return (Math.sin(6 * t) + Math.sin(amplitude * t + 43 * 77)) / 2;
+    return value / totalHarmonics;
+  };
+
+  const traitsToWave = (_: WaveDefiniton, t: number) => {
+    // Mental Stamina → Frequency (higher stamina = faster, more energetic rhythm)
+
+    // Convergent Thinking → Amplitude (focused output strength)
+
+    // Divergent Thinking → Harmonic Complexity
+    // const divergence = divergentThinking / 100;
+    // const frequency = 0.2 + (processingSpeed / 100) * 6;
+
+    // console.log("Divergence:", divergence);
+    const harmonics = [
+      makeConvergentThinkingWave(currentConvergentThinking, t),
+      makeDivergentThinkingWave(currentDivergentThinking, t),
+      makeAttentionSpanWave(currentAttentionSpan, t),
+    ];
+
+    // Openness → Phase offset (how they start their cycle)
+    // const openness = divergentThinking; // Using divergent thinking as a proxy for openness
+    // const phase = (openness / 100) * Math.PI;
+
+    // Processing Speed affects overall wave smoothness
+    // const smoothness = workingMemory / 100;
+    // const amplitude = convergentThinking / 100;
+
+    let value = 0;
+    let totalHarmonics = 0;
+
+    harmonics.forEach((harmonic) => {
+      value += harmonic;
       totalHarmonics++;
     });
 
@@ -97,13 +153,12 @@ const ResonanceSystem = () => {
       actRequirements: ActivityRequirements,
       t: number,
     ) => {
-      const charParams = traitsToWaveParams(charTraits);
-      const actParams = traitsToWaveParams(actRequirements);
+      const charParams = traitsToWaveParams(charTraits, t);
+      const actParams = traitsToWaveParams(actRequirements, t);
       setCharParams(charParams);
       setActParams(actParams);
-      const charWave = generateWave(charParams, t);
-      const actWave = generateWave(actParams, t);
-      console.log("Char Wave:", charWave, "Act Wave:", actWave);
+      const charWave = generateWave(charParams);
+      const actWave = generateWave(actParams);
 
       // Wave alignment (how close they are at this moment)
       const difference = Math.abs(charWave - actWave);
@@ -161,11 +216,17 @@ const ResonanceSystem = () => {
 
     return () => clearInterval(interval);
   }, [isRunning]);
+
   useEffect(() => {
     const char = characters[selectedChar];
     const activity = activities[selectedActivity];
     const resonance = calculateResonance(
-      char.traits,
+      {
+        ...char.traits,
+        attentionSpan: currentAttentionSpan,
+        convergentThinking: currentConvergentThinking,
+        divergentThinking: currentDivergentThinking,
+      },
       activity.requirements,
       time,
     );
@@ -183,12 +244,23 @@ const ResonanceSystem = () => {
       ...prev.slice(0, 50),
     ]);
   }, [
+    currentAttentionSpan,
     calculateResonance,
     generateReward,
     selectedActivity,
     selectedChar,
     time,
+    isRunning,
+    currentConvergentThinking,
+    currentDivergentThinking,
   ]);
+
+  useEffect(() => {
+    const char = characters[selectedChar];
+    setCurrentAttentionSpan(char.traits.attentionSpan);
+    setCurrentConvergentThinking(char.traits.convergentThinking);
+    setCurrentDivergentThinking(char.traits.divergentThinking);
+  }, [selectedChar]);
 
   console.log("Rendering App at time:", time);
 
@@ -199,22 +271,54 @@ const ResonanceSystem = () => {
 
   // Generate wave visualization
   const points = 400;
+  const generateVisualWaveData = (
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    waveFn: Function,
+    data: WaveDefiniton | number,
+    points: number,
+    time: number,
+  ) =>
+    Array.from({ length: points }, (_, i) => {
+      const t = time - (i / points) * 12;
+      return {
+        x: 400 - i,
+        y: 50 + waveFn(data, t) * 48,
+      };
+    });
 
-  const charWaveData = Array.from({ length: points }, (_, i) => {
-    const t = time - (i / points) * 12;
-    return {
-      x: 400 - i,
-      y: 50 + generateWave(charParams, t) * 50,
-    };
-  });
+  const charWaveData = generateVisualWaveData(
+    traitsToWave,
+    charParams,
+    points,
+    time,
+  );
+  const actWaveData = generateVisualWaveData(
+    traitsToWave,
+    actParams,
+    points,
+    time,
+  );
 
-  const actWaveData = Array.from({ length: points }, (_, i) => {
-    const t = time - (i / points) * 12;
-    return {
-      x: 400 - i,
-      y: 50 + generateWave(actParams, t) * 50,
-    };
-  });
+  const divergentThinkingData = generateVisualWaveData(
+    makeDivergentThinkingWave,
+    currentDivergentThinking,
+    points,
+    time,
+  );
+
+  const convergentThinkingData = generateVisualWaveData(
+    makeConvergentThinkingWave,
+    currentConvergentThinking,
+    points,
+    time,
+  );
+
+  const attentionSpanData = generateVisualWaveData(
+    makeAttentionSpanWave,
+    currentAttentionSpan,
+    points,
+    time,
+  );
 
   const avgReward =
     recentRewards.length > 0
@@ -349,6 +453,69 @@ const ResonanceSystem = () => {
           </div>
         </div>
       </div>
+
+      <div className="mt-3 text-xs text-gray-600 space-y-1">
+        {currentDivergentThinking}
+        <div className="w-10/12 m-auto">
+          <input
+            className="w-full"
+            min={0}
+            max={100}
+            value={currentDivergentThinking}
+            onChange={(event) =>
+              setCurrentDivergentThinking(Number(event.target.value))
+            }
+            type={"range"}
+          />
+        </div>
+      </div>
+      <Wave
+        points={divergentThinkingData}
+        title="Divergent Thinking"
+        color={char.color}
+      />
+
+      <div className="mt-3 text-xs text-gray-600 space-y-1">
+        {currentConvergentThinking}
+        <div className="w-10/12 m-auto">
+          <input
+            className="w-full"
+            min={0}
+            max={100}
+            value={currentConvergentThinking}
+            onChange={(event) =>
+              setCurrentConvergentThinking(Number(event.target.value))
+            }
+            type={"range"}
+          />
+        </div>
+      </div>
+      <Wave
+        points={convergentThinkingData}
+        title="Convergent Thinking"
+        color={char.color}
+      />
+
+      <div className="mt-3 text-xs text-gray-600 space-y-1">
+        {currentAttentionSpan}
+        <div className="w-10/12 m-auto">
+          <input
+            className="w-full"
+            min={0}
+            max={100}
+            value={currentAttentionSpan}
+            onChange={(event) =>
+              setCurrentAttentionSpan(Number(event.target.value))
+            }
+            type={"range"}
+          />
+        </div>
+      </div>
+      <Wave
+        points={attentionSpanData}
+        title="Attention Span"
+        color={char.color}
+      />
 
       {/* Wave Visualization */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
