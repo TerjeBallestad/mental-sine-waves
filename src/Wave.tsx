@@ -7,12 +7,14 @@ type WaveProps = {
   points: WaveData[];
   color: string;
   title: string;
+  children?: React.ReactNode;
 };
 
-export const Wave = ({ color, points, title }: WaveProps) => {
+export const Wave = ({ color, points, title, children }: WaveProps) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4 text-gray-800">{title}</h2>
+      {children}
       <svg viewBox="0 0 400 100" className="w-full h-48 bg-gray-50 rounded">
         <line
           x1="-50"
