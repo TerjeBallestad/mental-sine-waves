@@ -10,8 +10,8 @@ import {
 import {
   activities,
   characters,
+  emptyTraits,
   type Activity,
-  type ActivityRequirements,
   type Character,
   type CharacterTraits,
   type RewardData,
@@ -25,24 +25,15 @@ const ResonanceSystem = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedChar, setSelectedChar] = useState(0);
+  const [currentTraits, setCurrentTraits] = useState(emptyTraits);
   const [selectedActivity, setSelectedActivity] = useState(0);
   const [recentRewards, setRecentRewards] = useState(Array<RewardData>());
   const [showMapping, setShowMapping] = useState(false);
   const [currentResonance, setCurrentResonance] = useState(0);
-  const [currentAttentionSpan, setCurrentAttentionSpan] = useState(0);
-  const [currentConvergentThinking, setCurrentConvergentThinking] = useState(0);
-  const [currentDivergentThinking, setCurrentDivergentThinking] = useState(0);
-  const [genericAmplitude, setGenericAmplitude] = useState(100);
-  const [genericFrequency, setGenericFrequency] = useState(100);
-  const [genericPhase, setGenericPhase] = useState(0);
-  const [genericVerticalShift, setGenericVerticalShift] = useState(0);
 
-  const genericSine = (
+  const sineWaveGenerator = (
     t: number,
-    amplitude = 100,
-    frequency = 100,
-    phase = 0,
-    verticalShift = 0,
+    { amplitude = 100, frequency = 100, phase = 0, verticalShift = 0 },
   ) => {
     return (
       (amplitude / 100) *
@@ -51,80 +42,111 @@ const ResonanceSystem = () => {
     );
   };
 
-  const genericWrapper = (
-    t: number,
-    {
-      amplitude,
-      frequency,
-      phase,
-      verticalShift,
-    }: {
-      amplitude: number;
-      frequency: number;
-      phase: number;
-      verticalShift: number;
+  const makeAttentionSpanWave = useCallback(
+    (
+      t: number,
+      { attentionSpan, agreeableness, processingSpeed }: CharacterTraits,
+    ) => {
+      // Square wave for attention span
+      return (
+        (Math.sign(
+          sineWaveGenerator(t, {
+            amplitude: 100,
+            frequency: processingSpeed,
+            phase: 20,
+            verticalShift: agreeableness,
+          }),
+        ) *
+          attentionSpan) /
+        100
+      );
     },
-  ) => {
-    return genericSine(t, amplitude, frequency, phase, verticalShift);
-  };
+    [],
+  );
 
-  const makeAttentionSpanWave = (t: number, value: number) => {
-    return (Math.sign(Math.sin(t)) * value) / 100;
-  };
+  const makeDivergentThinkingWave = useCallback(
+    (
+      t: number,
+      { creativity, fortitude, extraversion, openness }: CharacterTraits,
+    ) => {
+      return sineWaveGenerator(t, {
+        amplitude: fortitude,
+        frequency: (creativity + 0.2) * 0.8,
+        phase: extraversion,
+        verticalShift: openness,
+      });
+    },
+    [],
+  );
 
-  const makeDivergentThinkingWave = (t: number, value: number) => {
-    return (Math.sin(5 * t) * value) / 100;
-  };
+  const makeConvergentThinkingWave = useCallback(
+    (
+      t: number,
+      { focus, fortitude, conscientiousness, neuroticism }: CharacterTraits,
+    ) => {
+      return sineWaveGenerator(t, {
+        amplitude: fortitude,
+        frequency: focus * 0.3,
+        phase: conscientiousness,
+        verticalShift: neuroticism,
+      });
+    },
+    [],
+  );
 
-  const makeConvergentThinkingWave = (t: number, value: number) => {
-    return (Math.sin(0.2 * t) * value) / 100;
-  };
+  const traitsToWave = useCallback(
+    (
+      t: number,
+      {
+        fortitude,
+        attentionSpan,
+        focus,
+        creativity,
+        extraversion,
+        openness,
+        neuroticism,
+        conscientiousness,
+        agreeableness,
+        processingSpeed,
+      }: CharacterTraits,
+    ) => {
+      // console.log("Divergence:", divergence);
+      const harmonics = [
+        makeConvergentThinkingWave(t, {
+          focus,
+          fortitude,
+          conscientiousness,
+          neuroticism,
+        } as CharacterTraits),
+        makeDivergentThinkingWave(t, {
+          creativity,
+          fortitude,
+          extraversion,
+          openness,
+        } as CharacterTraits),
+        makeAttentionSpanWave(t, {
+          attentionSpan,
+          agreeableness,
+          processingSpeed,
+        } as CharacterTraits),
+      ];
 
-  const traitsToWave = (
-    t: number,
-    {
-      mentalStamina,
-      attentionSpan,
-      convergentThinking,
-      divergentThinking,
-    }: ActivityRequirements | CharacterTraits,
-  ) => {
-    // Mental Stamina → Frequency (higher stamina = faster, more energetic rhythm)
+      let value = 0;
+      let totalHarmonics = 0;
 
-    // Convergent Thinking → Amplitude (focused output strength)
+      harmonics.forEach((harmonic) => {
+        value += harmonic;
+        totalHarmonics++;
+      });
 
-    // Divergent Thinking → Harmonic Complexity
-    // const divergence = divergentThinking / 100;
-    // const frequency = 0.2 + (processingSpeed / 100) * 6;
-
-    // console.log("Divergence:", divergence);
-    const harmonics = [
-      makeConvergentThinkingWave(t, convergentThinking),
-      makeDivergentThinkingWave(t, divergentThinking),
-      makeAttentionSpanWave(t, attentionSpan),
-    ];
-
-    // Openness → Phase offset (how they start their cycle)
-    // const openness = divergentThinking; // Using divergent thinking as a proxy for openness
-    // const phase = (openness / 100) * Math.PI;
-
-    // Processing Speed affects overall wave smoothness
-    // const smoothness = workingMemory / 100;
-    // const amplitude = convergentThinking / 100;
-
-    let value = 0;
-    let totalHarmonics = 0;
-
-    harmonics.forEach((harmonic) => {
-      value += harmonic;
-      totalHarmonics++;
-    });
-
-    // Normalize and apply amplitude
-    // return ((amplitude * value) / totalHarmonics) * smoothness;
-    // return (Math.sin(6 * t) + Math.sin(amplitude * t + 43 * 77)) / 2;
-    return value / totalHarmonics + mentalStamina / 100;
-  };
+      return value / totalHarmonics;
+    },
+    [
+      makeAttentionSpanWave,
+      makeConvergentThinkingWave,
+      makeDivergentThinkingWave,
+    ],
+  );
 
   /**
    *Calculate how well character traits match activity requirements
@@ -132,22 +154,50 @@ const ResonanceSystem = () => {
   const calculateResonance = useCallback(
     (
       charTraits: CharacterTraits,
-      actRequirements: ActivityRequirements,
+      actRequirements: CharacterTraits,
       t: number,
     ) => {
       const charWave = traitsToWave(t, charTraits);
-      const actWave = traitsToWave(t, actRequirements);
+      const maxSamples = 5;
+      const samples = Math.round(
+        ((charTraits.workingMemory - 1) * (maxSamples - 1)) / (100 - 1) + 1,
+      );
+      let highestResonance = 0;
+      console.log(
+        samples,
+        "samples for working memory",
+        charTraits.workingMemory,
+      );
+      for (let i = 0; i < samples; i++) {
+        const sampleTime = t - i * 0.15;
+        const sampleValue = traitsToWave(sampleTime, actRequirements);
+        const difference = Math.abs(charWave - sampleValue);
+        const waveAlignment = 1 - difference;
+        if (waveAlignment > highestResonance) {
+          highestResonance = waveAlignment;
+        }
+        console.log(
+          "Sample",
+          i,
+          "Time:",
+          sampleTime,
+          "Value:",
+          sampleValue,
+          "Alignment:",
+          waveAlignment,
+        );
+      }
 
-      // Wave alignment (how close they are at this moment)
-      const difference = Math.abs(charWave - actWave);
-      const waveAlignment = 1 - difference;
+      // // Wave alignment (how close they are at this moment)
+      // const difference = Math.abs(charWave - actWave);
+      // const waveAlignment = 1 - difference;
 
       // Weighted combination
-      const resonance = waveAlignment;
+      // const resonance = waveAlignment;
 
-      return Math.max(0, Math.min(1, resonance));
+      return Math.max(0, Math.min(1, highestResonance));
     },
-    [],
+    [traitsToWave],
   );
 
   /**
@@ -162,28 +212,25 @@ const ResonanceSystem = () => {
   /**
    *Generate reward based on resonance
    */
-  const generateReward = useCallback(
-    (_1: Character, _: Activity, resonance: number) => {
-      // Base reward from resonance (30-100 range)
-      const baseReward = resonance * 100;
+  const generateReward = useCallback((resonance: number) => {
+    // Base reward from resonance (30-100 range)
+    const baseReward = resonance * 100;
 
-      // Interest bonus: flat +20 points
-      // const interestBonus = hasInterestBonus(char, activity) ? 20 : 0;
-      const interestBonus = 20;
+    // Interest bonus: flat +20 points
+    // const interestBonus = hasInterestBonus(char, activity) ? 20 : 0;
+    const interestBonus = 20;
 
-      // Add small random variation (±10%) - natural performance fluctuation
-      // const variation = (Math.random() - 0.5) * 0.2;
-      const finalReward = Math.max(0, baseReward + interestBonus);
+    // Add small random variation (±10%) - natural performance fluctuation
+    // const variation = (Math.random() - 0.5) * 0.2;
+    const finalReward = Math.max(0, baseReward + interestBonus);
 
-      return {
-        amount: Math.round(finalReward),
-        base: Math.round(baseReward),
-        bonus: interestBonus,
-        resonance: resonance,
-      };
-    },
-    [],
-  );
+    return {
+      amount: Math.round(finalReward),
+      base: Math.round(baseReward),
+      bonus: interestBonus,
+      resonance: resonance,
+    };
+  }, []);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -196,20 +243,15 @@ const ResonanceSystem = () => {
   }, [isRunning]);
 
   useEffect(() => {
-    const char = characters[selectedChar];
     const activity = activities[selectedActivity];
     const resonance = calculateResonance(
-      {
-        ...char.traits,
-        attentionSpan: currentAttentionSpan,
-        convergentThinking: currentConvergentThinking,
-        divergentThinking: currentDivergentThinking,
-      },
+      currentTraits,
       activity.requirements,
       time,
     );
+
     setCurrentResonance(resonance);
-    const reward = generateReward(char, activity, resonance);
+    const reward = generateReward(resonance);
 
     setRecentRewards((prev) => [
       {
@@ -222,22 +264,18 @@ const ResonanceSystem = () => {
       ...prev.slice(0, 50),
     ]);
   }, [
-    currentAttentionSpan,
     calculateResonance,
     generateReward,
     selectedActivity,
     selectedChar,
     time,
     isRunning,
-    currentConvergentThinking,
-    currentDivergentThinking,
+    currentTraits,
   ]);
 
   useEffect(() => {
     const char = characters[selectedChar];
-    setCurrentAttentionSpan(char.traits.attentionSpan);
-    setCurrentConvergentThinking(char.traits.convergentThinking);
-    setCurrentDivergentThinking(char.traits.divergentThinking);
+    setCurrentTraits(char.traits);
   }, [selectedChar]);
 
   console.log("Rendering App at time:", time);
@@ -266,7 +304,7 @@ const ResonanceSystem = () => {
   const charWaveData = generateVisualWaveData(
     traitsToWave,
     time,
-    char.traits,
+    currentTraits,
     points,
   );
   const actWaveData = generateVisualWaveData(
@@ -276,36 +314,24 @@ const ResonanceSystem = () => {
     points,
   );
 
-  const genericSineData = generateVisualWaveData(
-    genericWrapper,
-    time,
-    {
-      amplitude: genericAmplitude,
-      frequency: genericFrequency,
-      phase: genericPhase,
-      verticalShift: genericVerticalShift,
-    },
-    points,
-  );
-
   const divergentThinkingData = generateVisualWaveData(
     makeDivergentThinkingWave,
     time,
-    currentDivergentThinking,
+    currentTraits,
     points,
   );
 
   const convergentThinkingData = generateVisualWaveData(
     makeConvergentThinkingWave,
     time,
-    currentConvergentThinking,
+    currentTraits,
     points,
   );
 
   const attentionSpanData = generateVisualWaveData(
     makeAttentionSpanWave,
     time,
-    currentAttentionSpan,
+    currentTraits,
     points,
   );
 
@@ -482,137 +508,6 @@ const ResonanceSystem = () => {
         </div>
       </div>
 
-      <Wave
-        points={genericSineData}
-        title="generic Sine Wave"
-        color={char.color}
-      >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {genericAmplitude}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={genericAmplitude}
-              onChange={(event) =>
-                setGenericAmplitude(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {genericFrequency}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={genericFrequency}
-              onChange={(event) =>
-                setGenericFrequency(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {genericPhase}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={genericPhase}
-              onChange={(event) => setGenericPhase(Number(event.target.value))}
-              type={"range"}
-            />
-          </div>
-        </div>
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {genericVerticalShift}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={-50}
-              max={50}
-              value={genericVerticalShift}
-              onChange={(event) =>
-                setGenericVerticalShift(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-      </Wave>
-
-      <Wave
-        points={divergentThinkingData}
-        title="Divergent Thinking"
-        color={char.color}
-      >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {currentDivergentThinking}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={currentDivergentThinking}
-              onChange={(event) =>
-                setCurrentDivergentThinking(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-      </Wave>
-
-      <Wave
-        points={convergentThinkingData}
-        title="Convergent Thinking"
-        color={char.color}
-      >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {currentConvergentThinking}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={currentConvergentThinking}
-              onChange={(event) =>
-                setCurrentConvergentThinking(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-      </Wave>
-
-      <Wave
-        points={attentionSpanData}
-        title="Attention Span"
-        color={char.color}
-      >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          {currentAttentionSpan}
-          <div className="w-10/12 m-auto">
-            <input
-              className="w-full"
-              min={0}
-              max={100}
-              value={currentAttentionSpan}
-              onChange={(event) =>
-                setCurrentAttentionSpan(Number(event.target.value))
-              }
-              type={"range"}
-            />
-          </div>
-        </div>
-      </Wave>
-
       {/* Simulation */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -708,6 +603,203 @@ const ResonanceSystem = () => {
           </div>
         </div>
       </div>
+
+      <Wave
+        points={divergentThinkingData}
+        title="Divergent Thinking"
+        color={char.color}
+      >
+        <div className="mt-3 text-xs text-gray-600 space-y-1">
+          <div className="w-10/12 m-auto">
+            <label>
+              Creativity:
+              {currentTraits.creativity}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.creativity}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    creativity: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Fortitude:
+              {currentTraits.fortitude}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.fortitude}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    fortitude: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Openness:
+              {currentTraits.openness}
+              <input
+                className="w-full"
+                min={-100}
+                max={100}
+                value={currentTraits.openness}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    openness: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Extraversion:
+              {currentTraits.extraversion}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.extraversion}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    extraversion: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+          </div>
+        </div>
+      </Wave>
+
+      <Wave
+        points={convergentThinkingData}
+        title="Convergent Thinking"
+        color={char.color}
+      >
+        <div className="mt-3 text-xs text-gray-600 space-y-1">
+          <div className="w-10/12 m-auto">
+            <label>
+              Focus: {currentTraits.focus}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.focus}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    focus: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Fortitude: {currentTraits.fortitude}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.fortitude}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    fortitude: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Conscientiousness: {currentTraits.conscientiousness}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.conscientiousness}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    conscientiousness: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Neuroticism: {currentTraits.neuroticism}
+              <input
+                className="w-full"
+                min={-100}
+                max={100}
+                value={currentTraits.neuroticism}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    neuroticism: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+          </div>
+        </div>
+      </Wave>
+
+      <Wave
+        points={attentionSpanData}
+        title="Attention Span"
+        color={char.color}
+      >
+        <div className="mt-3 text-xs text-gray-600 space-y-1">
+          <div className="w-10/12 m-auto">
+            <label>
+              Attention Span: {currentTraits.attentionSpan}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.attentionSpan}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    attentionSpan: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+            <label>
+              Processing Speed: {currentTraits.processingSpeed}
+              <input
+                className="w-full"
+                min={0}
+                max={100}
+                value={currentTraits.processingSpeed}
+                onChange={(event) =>
+                  setCurrentTraits((prev) => ({
+                    ...prev,
+                    processingSpeed: Number(event.target.value),
+                  }))
+                }
+                type={"range"}
+              />
+            </label>
+          </div>
+        </div>
+      </Wave>
 
       {/* Design Notes */}
       <div className="bg-purple-50 rounded-lg p-6 border border-purple-200">
