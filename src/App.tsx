@@ -344,63 +344,63 @@ const ResonanceSystem = () => {
       : 0;
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2 text-gray-800">
-          Trait-Based Resonance System
-        </h1>
-        <p className="text-gray-600 mb-3">
-          Character traits create unique mental rhythms. Observe performance to
-          learn compatibility.
-        </p>
-        <button
-          onClick={() => setShowMapping(!showMapping)}
-          className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-        >
-          <Info className="w-4 h-4" />
-          {showMapping ? "Hide" : "Show"} trait-to-wave mapping
-        </button>
+    <div className="bg-base-200 mx-auto w-full max-w-6xl">
+      <div className="card card-border bg-base-100 mb-6 shadow-lg">
+        <div className="card-body">
+          <h1 className="card-title">Trait-Based Resonance System</h1>
+          <p className="mb-3">
+            Character traits create unique mental rhythms. Observe performance
+            to learn compatibility.
+          </p>
+          <div className="card-actions">
+            <button
+              onClick={() => setShowMapping(!showMapping)}
+              className="btn btn-info btn-soft"
+            >
+              <Info className="size-4" />
+              {showMapping ? "Hide" : "Show"} trait-to-wave mapping
+            </button>
+          </div>
+        </div>
       </div>
 
       {showMapping && (
-        <div className="bg-blue-50 rounded-lg p-6 mb-6 border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-3">
-            How Traits Map to Wave Properties:
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-900">
+        <div className="card bg-neutral card-outline mb-6">
+          <div className="card-body grid grid-cols-1 md:grid-cols-2">
+            <h3 className="card-title">How Traits Map to Wave Properties:</h3>
             <div>
               <strong>Mental Stamina → Frequency</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Higher stamina = faster, more energetic rhythm
               </p>
             </div>
             <div>
               <strong>Convergent Thinking → Amplitude</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Higher focus = stronger, more pronounced output
               </p>
             </div>
             <div>
               <strong>Divergent Thinking → Harmonics</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Higher creativity = more complex wave patterns
               </p>
             </div>
             <div>
               <strong>Openness → Phase Offset</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 Affects starting point and adaptability
               </p>
             </div>
             <div>
               <strong>Processing Speed → Smoothness</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 How clean and efficient their output is
               </p>
             </div>
             <div>
               <strong>Interests → Flat Bonus</strong>
-              <p className="text-xs mt-1">
+              <p className="mt-1 text-xs">
                 +20 points when matched with activity
               </p>
             </div>
@@ -408,20 +408,18 @@ const ResonanceSystem = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            Character
-          </h2>
-          <div className="space-y-2">
+      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="card card-outline bg-base-100 shadow-lg">
+          <div className="card-body">
+            <h2 className="card-title">Character</h2>
             {characters.map((c, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedChar(idx)}
-                className={`w-full p-3 rounded-lg text-left transition-colors ${
+                className={`flex w-full gap-6 rounded-lg p-3 ${
                   selectedChar === idx
                     ? "border-2"
-                    : "bg-gray-50 border-2 border-gray-200 hover:bg-gray-100"
+                    : "bg-neutral border-neutral hover:bg-neutral-active border-2"
                 }`}
                 style={{
                   backgroundColor:
@@ -429,52 +427,72 @@ const ResonanceSystem = () => {
                   borderColor: selectedChar === idx ? c.color : undefined,
                 }}
               >
-                <div className="font-semibold text-gray-800">{c.name}</div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {c.description}
+                <div
+                  className="avatar avatar-placeholder"
+                  style={{ borderColor: c.color }}
+                >
+                  <div
+                    className="w-18 rounded-full border-2"
+                    style={{
+                      borderColor: c.color,
+                      backgroundColor: c.color + "33",
+                    }}
+                  >
+                    <span className="text-3xl" style={{ color: c.color }}>
+                      {c.name.charAt(0)}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Interests: {c.interests.join(", ")}
+                <div className="text-left transition-colors">
+                  <div className="text-xl font-semibold">{c.name}</div>
+                  <div className="mt-1 opacity-70">{c.description}</div>
+                  <div className="text-secondary mt-1 text-xs">
+                    Interests: {c.interests.join(", ")}
+                  </div>
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Activity</h2>
-          <div className="space-y-2">
-            {activities.map((a, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedActivity(idx)}
-                className={`w-full p-3 rounded-lg text-left transition-colors ${
-                  selectedActivity === idx
-                    ? "border-2"
-                    : "bg-gray-50 border-2 border-gray-200 hover:bg-gray-100"
-                }`}
-                style={{
-                  backgroundColor:
-                    selectedActivity === idx ? `${a.color}15` : undefined,
-                  borderColor: selectedActivity === idx ? a.color : undefined,
-                }}
-              >
-                <div className="font-semibold text-gray-800">{a.name}</div>
-                <div className="text-xs text-gray-600 mt-1">
-                  {a.description}
-                </div>
-              </button>
-            ))}
+        <div className="card card-outline bg-base-100 shadow-lg">
+          <div className="card-body">
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+              Activity
+            </h2>
+            <div className="space-y-2">
+              {activities.map((a, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedActivity(idx)}
+                  className={`w-full rounded-lg p-3 text-left transition-colors ${
+                    selectedActivity === idx
+                      ? "border-2"
+                      : "border-2 border-gray-200 bg-gray-50 hover:bg-gray-100"
+                  }`}
+                  style={{
+                    backgroundColor:
+                      selectedActivity === idx ? `${a.color}15` : undefined,
+                    borderColor: selectedActivity === idx ? a.color : undefined,
+                  }}
+                >
+                  <div className="font-semibold text-gray-800">{a.name}</div>
+                  <div className="mt-1 text-xs text-gray-600">
+                    {a.description}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Wave Visualization */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+      <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
+        <h2 className="mb-4 text-xl font-semibold text-gray-800">
           Mental Rhythm Patterns (Hidden from Player)
         </h2>
-        <svg viewBox="0 0 400 100" className="w-full h-48 bg-gray-50 rounded">
+        <svg viewBox="0 0 400 100" className="h-48 w-full rounded bg-gray-50">
           <line
             x1="-50"
             y1="50"
@@ -498,7 +516,7 @@ const ResonanceSystem = () => {
             strokeDasharray="5 3"
           />
         </svg>
-        <div className="flex justify-between mt-3 text-sm">
+        <div className="mt-3 flex justify-between text-sm">
           <span style={{ color: char.color }} className="font-medium">
             ■ {char.name}'s rhythm
           </span>
@@ -509,20 +527,20 @@ const ResonanceSystem = () => {
       </div>
 
       {/* Simulation */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-800">
             Performance Simulation
           </h2>
           <div className="flex gap-2">
             <button
               onClick={() => setIsRunning(!isRunning)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               {isRunning ? (
-                <Pause className="w-4 h-4" />
+                <Pause className="h-4 w-4" />
               ) : (
-                <Play className="w-4 h-4" />
+                <Play className="h-4 w-4" />
               )}
               {isRunning ? "Pause" : "Start"}
             </button>
@@ -532,25 +550,25 @@ const ResonanceSystem = () => {
                 setRecentRewards([]);
                 setIsRunning(false);
               }}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
+              className="flex items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="h-4 w-4" />
               Reset
             </button>
             <button
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2"
+              className="flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
               onClick={() => setTime((prev) => prev + timeStep)}
             >
               Step
-              <ArrowRight className="w-4 h-4 text-gray-400" />
+              <ArrowRight className="h-4 w-4 text-gray-400" />
             </button>
           </div>
         </div>
 
         {/* Reward Display */}
-        <div className="bg-linear-to-br from-amber-50 to-yellow-50 rounded-lg p-6 border-2 border-amber-200 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-amber-600" />
+        <div className="mb-4 rounded-lg border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 p-6">
+          <div className="mb-2 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-amber-600" />
             <span className="font-semibold text-gray-700">
               Resources Generated
             </span>
@@ -560,7 +578,7 @@ const ResonanceSystem = () => {
               {recentRewards.length > 0 ? recentRewards[0].value : "--"}
             </div>
             {hasBonus && (
-              <div className="text-sm text-green-700 bg-green-100 px-2 py-1 rounded">
+              <div className="rounded bg-green-100 px-2 py-1 text-sm text-green-700">
                 +{recentRewards.length > 0 ? recentRewards[0].bonus : 20}{" "}
                 Interest Bonus!
               </div>
@@ -579,14 +597,14 @@ const ResonanceSystem = () => {
 
         {/* Reward Stream */}
         <div>
-          <div className="text-sm font-semibold text-gray-700 mb-2">
+          <div className="mb-2 text-sm font-semibold text-gray-700">
             Resource Stream (What player sees):
           </div>
           <div className="flex flex-wrap gap-2">
             {recentRewards.map((reward, idx) => (
               <div
                 key={reward.time}
-                className="px-3 py-2 rounded-lg text-sm font-bold shadow-sm"
+                className="rounded-lg px-3 py-2 text-sm font-bold shadow-sm"
                 style={{
                   backgroundColor:
                     reward.resonance > 0.65
@@ -609,78 +627,76 @@ const ResonanceSystem = () => {
         title="Divergent Thinking"
         color={char.color}
       >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          <div className="w-10/12 m-auto">
-            <label>
-              Creativity:
-              {currentTraits.creativity}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.creativity}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    creativity: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Fortitude:
-              {currentTraits.fortitude}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.fortitude}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    fortitude: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Openness:
-              {currentTraits.openness}
-              <input
-                className="w-full"
-                min={-100}
-                max={100}
-                value={currentTraits.openness}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    openness: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Extraversion:
-              {currentTraits.extraversion}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.extraversion}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    extraversion: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-          </div>
-        </div>
+        <label className="input m-auto w-10/12">
+          <span className="label">
+            Creativity:
+            {currentTraits.creativity}
+          </span>
+          <input
+            className="range range-accent w-full"
+            min={0}
+            max={100}
+            value={currentTraits.creativity}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                creativity: Number(event.target.value),
+              }))
+            }
+            type="range"
+          />
+        </label>
+        <label>
+          Fortitude:
+          {currentTraits.fortitude}
+          <input
+            className="w-full"
+            min={0}
+            max={100}
+            value={currentTraits.fortitude}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                fortitude: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+        <label>
+          Openness:
+          {currentTraits.openness}
+          <input
+            className="w-full"
+            min={-100}
+            max={100}
+            value={currentTraits.openness}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                openness: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+        <label>
+          Extraversion:
+          {currentTraits.extraversion}
+          <input
+            className="w-full"
+            min={0}
+            max={100}
+            value={currentTraits.extraversion}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                extraversion: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
       </Wave>
 
       <Wave
@@ -688,8 +704,8 @@ const ResonanceSystem = () => {
         title="Convergent Thinking"
         color={char.color}
       >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          <div className="w-10/12 m-auto">
+        <div className="mt-3 space-y-1 text-xs text-gray-600">
+          <div className="m-auto w-10/12">
             <label>
               Focus: {currentTraits.focus}
               <input
@@ -763,8 +779,8 @@ const ResonanceSystem = () => {
         title="Attention Span"
         color={char.color}
       >
-        <div className="mt-3 text-xs text-gray-600 space-y-1">
-          <div className="w-10/12 m-auto">
+        <div className="mt-3 space-y-1 text-xs text-gray-600">
+          <div className="m-auto w-10/12">
             <label>
               Attention Span: {currentTraits.attentionSpan}
               <input
@@ -802,8 +818,8 @@ const ResonanceSystem = () => {
       </Wave>
 
       {/* Design Notes */}
-      <div className="bg-purple-50 rounded-lg p-6 border border-purple-200">
-        <h3 className="font-semibold text-purple-900 mb-3">
+      <div className="rounded-lg border border-purple-200 bg-purple-50 p-6">
+        <h3 className="mb-3 font-semibold text-purple-900">
           Design Implementation Notes:
         </h3>
         <div className="space-y-3 text-sm text-purple-900">

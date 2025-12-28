@@ -72,7 +72,7 @@ export const emptyTraits: CharacterTraits = {
 export const characters: Character[] = [
   {
     name: "Test Dummy",
-    color: "#f0f",
+    color: "#ff00ff",
     traits: {
       attentionSpan: 50,
       processingSpeed: 20,
