@@ -14,8 +14,11 @@ export const Wave = ({ color, points, title, children }: WaveProps) => {
   return (
     <div className="card bg-base-100 mb-6 shadow-lg">
       <div className="card-body">
-        {children}
-        <svg viewBox="0 0 400 100" className="bg-base-200 h-48 w-full rounded">
+        <div className="grid grid-cols-4 gap-2">{children}</div>
+        <svg
+          viewBox="0 0 400 100"
+          className="bg-base-200 h-48 w-full shadow-inner"
+        >
           <line
             x1="-50"
             y1="50"

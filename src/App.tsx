@@ -344,7 +344,7 @@ const ResonanceSystem = () => {
       : 0;
 
   return (
-    <div className="bg-base-200 mx-auto w-full max-w-6xl">
+    <div className="bg-base-200 mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div className="card card-border bg-base-100 mb-6 shadow-lg">
         <div className="card-body">
           <h1 className="card-title">Trait-Based Resonance System</h1>
@@ -488,136 +488,141 @@ const ResonanceSystem = () => {
       </div>
 
       {/* Wave Visualization */}
-      <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
-        <h2 className="mb-4 text-xl font-semibold text-gray-800">
-          Mental Rhythm Patterns (Hidden from Player)
-        </h2>
-        <svg viewBox="0 0 400 100" className="h-48 w-full rounded bg-gray-50">
-          <line
-            x1="-50"
-            y1="50"
-            x2="450"
-            y2="50"
-            stroke="#e5e7eb"
-            strokeWidth="1"
-            strokeDasharray="2 2"
-          />
-          <polyline
-            points={charWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill="none"
-            stroke={char.color}
-            strokeWidth="2.5"
-          />
-          <polyline
-            points={actWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill="none"
-            stroke={activity.color}
-            strokeWidth="2.5"
-            strokeDasharray="5 3"
-          />
-        </svg>
-        <div className="mt-3 flex justify-between text-sm">
-          <span style={{ color: char.color }} className="font-medium">
-            ■ {char.name}'s rhythm
-          </span>
-          <span style={{ color: activity.color }} className="font-medium">
-            ▪▪▪ {activity.name} demands
-          </span>
+      <div className="card bg-base-100 shadow-lg">
+        <div className="card-body">
+          <h2 className="card-title mb-4">
+            Mental Rhythm Patterns (Hidden from Player)
+          </h2>
+          <svg
+            viewBox="0 0 400 100"
+            className="bg-base-200 h-48 w-full rounded shadow-inner"
+          >
+            <line
+              x1="-50"
+              y1="50"
+              x2="450"
+              y2="50"
+              stroke="#e5e7eb"
+              strokeWidth="1"
+              strokeDasharray="2 2"
+            />
+            <polyline
+              points={charWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
+              fill="none"
+              stroke={char.color}
+              strokeWidth="2.5"
+            />
+            <polyline
+              points={actWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
+              fill="none"
+              stroke={activity.color}
+              strokeWidth="2.5"
+              strokeDasharray="5 3"
+            />
+          </svg>
+          <div className="mt-3 flex justify-between text-sm">
+            <span style={{ color: char.color }} className="font-medium">
+              ■ {char.name}'s rhythm
+            </span>
+            <span style={{ color: activity.color }} className="font-medium">
+              ▪▪▪ {activity.name} demands
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Simulation */}
-      <div className="mb-6 rounded-lg bg-white p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Performance Simulation
-          </h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setIsRunning(!isRunning)}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              {isRunning ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-              {isRunning ? "Pause" : "Start"}
-            </button>
-            <button
-              onClick={() => {
-                setTime(0);
-                setRecentRewards([]);
-                setIsRunning(false);
-              }}
-              className="flex items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Reset
-            </button>
-            <button
-              className="flex items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
-              onClick={() => setTime((prev) => prev + timeStep)}
-            >
-              Step
-              <ArrowRight className="h-4 w-4 text-gray-400" />
-            </button>
-          </div>
-        </div>
-
-        {/* Reward Display */}
-        <div className="mb-4 rounded-lg border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 p-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-600" />
-            <span className="font-semibold text-gray-700">
-              Resources Generated
-            </span>
-          </div>
-          <div className="flex items-baseline gap-3">
-            <div className="text-5xl font-bold text-amber-600">
-              {recentRewards.length > 0 ? recentRewards[0].value : "--"}
-            </div>
-            {hasBonus && (
-              <div className="rounded bg-green-100 px-2 py-1 text-sm text-green-700">
-                +{recentRewards.length > 0 ? recentRewards[0].bonus : 20}{" "}
-                Interest Bonus!
-              </div>
-            )}
-          </div>
-          <div className="mt-3 flex justify-between text-sm text-gray-600">
-            <div>
-              Average (last 15):{" "}
-              <span className="font-semibold text-gray-800">{avgReward}</span>
-            </div>
-            <div className="text-xs text-gray-500">
-              Resonance: {(currentResonance * 100).toFixed(1)}% (hidden)
-            </div>
-          </div>
-        </div>
-
-        {/* Reward Stream */}
-        <div>
-          <div className="mb-2 text-sm font-semibold text-gray-700">
-            Resource Stream (What player sees):
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {recentRewards.map((reward, idx) => (
-              <div
-                key={reward.time}
-                className="rounded-lg px-3 py-2 text-sm font-bold shadow-sm"
-                style={{
-                  backgroundColor:
-                    reward.resonance > 0.65
-                      ? "#86efac"
-                      : reward.resonance > 0.45
-                        ? "#fde047"
-                        : "#fca5a5",
-                  opacity: 1 - idx * 0.05,
-                }}
+      <div className="card bg-base-100 shadow-lg">
+        <div className="card-body">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="card-title">Performance Simulation</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsRunning(!isRunning)}
+                className="btn btn-primary"
               >
-                {reward.value}
+                {isRunning ? (
+                  <Pause className="size-4" />
+                ) : (
+                  <Play className="size-4" />
+                )}
+                {isRunning ? "Pause" : "Start"}
+              </button>
+              <button
+                onClick={() => {
+                  setTime(0);
+                  setRecentRewards([]);
+                  setIsRunning(false);
+                }}
+                className="btn btn-secondary"
+              >
+                <RotateCcw className="size-4" />
+                Reset
+              </button>
+              <button
+                className="btn btn-neutral"
+                onClick={() => setTime((prev) => prev + timeStep)}
+              >
+                Step
+                <ArrowRight className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Reward Display */}
+          <div className="mb-4 rounded-lg border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 p-6">
+            <div className="mb-2 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-600" />
+              <span className="font-semibold text-gray-700">
+                Resources Generated
+              </span>
+            </div>
+            <div className="flex items-baseline gap-3">
+              <div className="text-5xl font-bold text-amber-600">
+                {recentRewards.length > 0 ? recentRewards[0].value : "--"}
               </div>
-            ))}
+              {hasBonus && (
+                <div className="rounded bg-green-100 px-2 py-1 text-sm text-green-700">
+                  +{recentRewards.length > 0 ? recentRewards[0].bonus : 20}{" "}
+                  Interest Bonus!
+                </div>
+              )}
+            </div>
+            <div className="mt-3 flex justify-between text-sm text-gray-600">
+              <div>
+                Average (last 15):{" "}
+                <span className="font-semibold text-gray-800">{avgReward}</span>
+              </div>
+              <div className="text-xs text-gray-500">
+                Resonance: {(currentResonance * 100).toFixed(1)}% (hidden)
+              </div>
+            </div>
+          </div>
+
+          {/* Reward Stream */}
+          <div>
+            <div className="mb-2 text-sm font-semibold text-gray-700">
+              Resource Stream (What player sees):
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recentRewards.map((reward, idx) => (
+                <div
+                  key={reward.time}
+                  className="rounded-lg px-3 py-2 text-sm font-bold shadow-sm"
+                  style={{
+                    backgroundColor:
+                      reward.resonance > 0.65
+                        ? "#86efac"
+                        : reward.resonance > 0.45
+                          ? "#fde047"
+                          : "#fca5a5",
+                    opacity: 1 - idx * 0.05,
+                  }}
+                >
+                  {reward.value}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -627,8 +632,8 @@ const ResonanceSystem = () => {
         title="Divergent Thinking"
         color={char.color}
       >
-        <label className="input m-auto w-10/12">
-          <span className="label">
+        <label className="input w-full">
+          <span className="label w-50">
             Creativity:
             {currentTraits.creativity}
           </span>
@@ -646,11 +651,13 @@ const ResonanceSystem = () => {
             type="range"
           />
         </label>
-        <label>
-          Fortitude:
-          {currentTraits.fortitude}
+        <label className="input w-full">
+          <span className="label w-50">
+            Fortitude:
+            {currentTraits.fortitude}
+          </span>
           <input
-            className="w-full"
+            className="range range-primary w-full"
             min={0}
             max={100}
             value={currentTraits.fortitude}
@@ -663,11 +670,13 @@ const ResonanceSystem = () => {
             type={"range"}
           />
         </label>
-        <label>
-          Openness:
-          {currentTraits.openness}
+        <label className="input w-full">
+          <span className="label w-50">
+            Openness:
+            {currentTraits.openness}
+          </span>
           <input
-            className="w-full"
+            className="range range-secondary w-full"
             min={-100}
             max={100}
             value={currentTraits.openness}
@@ -680,11 +689,13 @@ const ResonanceSystem = () => {
             type={"range"}
           />
         </label>
-        <label>
-          Extraversion:
-          {currentTraits.extraversion}
+        <label className="input w-full">
+          <span className="label w-50">
+            Extraversion:
+            {currentTraits.extraversion}
+          </span>
           <input
-            className="w-full"
+            className="range range-info w-full"
             min={0}
             max={100}
             value={currentTraits.extraversion}
@@ -704,74 +715,77 @@ const ResonanceSystem = () => {
         title="Convergent Thinking"
         color={char.color}
       >
-        <div className="mt-3 space-y-1 text-xs text-gray-600">
-          <div className="m-auto w-10/12">
-            <label>
-              Focus: {currentTraits.focus}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.focus}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    focus: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Fortitude: {currentTraits.fortitude}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.fortitude}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    fortitude: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Conscientiousness: {currentTraits.conscientiousness}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.conscientiousness}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    conscientiousness: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Neuroticism: {currentTraits.neuroticism}
-              <input
-                className="w-full"
-                min={-100}
-                max={100}
-                value={currentTraits.neuroticism}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    neuroticism: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-          </div>
-        </div>
+        <label className="input w-full">
+          <span className="label w-50">Focus: {currentTraits.focus}</span>
+          <input
+            className="range range-accent w-full"
+            min={0}
+            max={100}
+            value={currentTraits.focus}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                focus: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+        <label className="input w-full">
+          <span className="label w-50">
+            Fortitude: {currentTraits.fortitude}
+          </span>
+          <input
+            className="range range-primary w-full"
+            min={0}
+            max={100}
+            value={currentTraits.fortitude}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                fortitude: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+
+        <label className="input w-full">
+          <span className="label w-50">
+            Neuroticism: {currentTraits.neuroticism}
+          </span>
+          <input
+            className="range range-secondary w-full"
+            min={-100}
+            max={100}
+            value={currentTraits.neuroticism}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                neuroticism: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+        <label className="input w-full">
+          <span className="label w-50">
+            Conscientiousness: {currentTraits.conscientiousness}
+          </span>
+          <input
+            className="range range-info w-full"
+            min={0}
+            max={100}
+            value={currentTraits.conscientiousness}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                conscientiousness: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
       </Wave>
 
       <Wave
@@ -779,42 +793,42 @@ const ResonanceSystem = () => {
         title="Attention Span"
         color={char.color}
       >
-        <div className="mt-3 space-y-1 text-xs text-gray-600">
-          <div className="m-auto w-10/12">
-            <label>
-              Attention Span: {currentTraits.attentionSpan}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.attentionSpan}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    attentionSpan: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-            <label>
-              Processing Speed: {currentTraits.processingSpeed}
-              <input
-                className="w-full"
-                min={0}
-                max={100}
-                value={currentTraits.processingSpeed}
-                onChange={(event) =>
-                  setCurrentTraits((prev) => ({
-                    ...prev,
-                    processingSpeed: Number(event.target.value),
-                  }))
-                }
-                type={"range"}
-              />
-            </label>
-          </div>
-        </div>
+        <label className="input w-full">
+          <span className="label w-50">
+            Processing <br></br> Speed: {currentTraits.processingSpeed}
+          </span>
+          <input
+            className="range range-accent w-full"
+            min={0}
+            max={100}
+            value={currentTraits.processingSpeed}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                processingSpeed: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
+        <label className="input w-full">
+          <span className="label w-55">
+            Attention Span: {currentTraits.attentionSpan}
+          </span>
+          <input
+            className="range range-accent w-full"
+            min={0}
+            max={100}
+            value={currentTraits.attentionSpan}
+            onChange={(event) =>
+              setCurrentTraits((prev) => ({
+                ...prev,
+                attentionSpan: Number(event.target.value),
+              }))
+            }
+            type={"range"}
+          />
+        </label>
       </Wave>
 
       {/* Design Notes */}
