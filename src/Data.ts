@@ -1,16 +1,65 @@
 export type CharacterTraits = {
-  attentionSpan: number;
-  processingSpeed: number;
-  workingMemory: number;
-  fortitude: number;
-  creativity: number;
-  focus: number;
-  intellect: number;
-  openness: number;
-  conscientiousness: number;
-  extraversion: number;
-  agreeableness: number;
-  neuroticism: number;
+  workingMemory: number; //no
+  intellect: number; //no
+  agreeableness: number; //no
+  attentionSpan: number; //yes
+  processingSpeed: number; //yes
+  fortitude: number; //yes
+  creativity: number; //yes
+  focus: number; //yes
+  openness: number; //yes
+  conscientiousness: number; //yes
+  extraversion: number; //yes
+  neuroticism: number; //yes
+};
+
+export type Resource =
+  | "none"
+  | "SocialExperience"
+  | "TechnicalExperience"
+  | "AnalyticalExperience"
+  | "Money"
+  | "Ideas"
+  | "Information"
+  | "Innovation"
+  | "Insight"
+  | "Knowledge"
+  | "Research"
+  | "Truth"
+  | "Wisdom"
+  | "Authority"
+  | "Connection"
+  | "Influence"
+  | "Reputation"
+  | "Trust"
+  | "Popularity"
+  | "Beauty"
+  | "Vision"
+  | "Wonder"
+  | "Infrastructure"
+  | "Materials"
+  | "Momentum"
+  | "Money"
+  | "Order"
+  | "Plans"
+  | "Refinement"
+  | "Clarity"
+  | "Destruction"
+  | "Failure"
+  | "Deconstruction"
+  | "Legacy"
+  | "Mastery"
+  | "Purpose"
+  | "Focus"
+  | "Intuition";
+
+export type ResourceData = {
+  amount: number;
+  chance: number;
+  // How much the final amount is influenced by the ressonance of the sine waves
+  // 0 = the whole amount is given in all cases
+  // 1 = the final amount is 100% influenced by the sine wave ressonance
+  influence: number;
 };
 
 export type Activity = {
@@ -19,6 +68,7 @@ export type Activity = {
   requirements: CharacterTraits;
   interestBonus: string[];
   description?: string;
+  reward: Partial<Record<Resource, ResourceData>>;
 };
 
 export type WaveDefiniton = {
@@ -80,12 +130,12 @@ export const characters: Character[] = [
       fortitude: 10,
       creativity: 10,
       focus: 10,
-      intellect: 50,
-      openness: 0,
-      conscientiousness: 0,
-      extraversion: 0,
-      agreeableness: 0,
-      neuroticism: 0,
+      intellect: 20,
+      openness: 1,
+      conscientiousness: 1,
+      extraversion: 1,
+      agreeableness: 1,
+      neuroticism: 1,
     },
     interests: ["routine", "observation"],
     description: "Balanced, neutral character for testing",
@@ -156,6 +206,7 @@ export const characters: Character[] = [
 export const activities: Activity[] = [
   {
     name: "Research & Documentation",
+    description: "Detailed work requiring focus and organization",
     color: "#f59e0b",
     requirements: {
       fortitude: 45, // Requires moderate sustained effort
@@ -172,7 +223,11 @@ export const activities: Activity[] = [
       neuroticism: 65,
     },
     interestBonus: ["writing", "observation"],
-    description: "Detailed work requiring focus and organization",
+    reward: {
+      Insight: { amount: 10, influence: 1, chance: 0.2 },
+      AnalyticalExperience: { amount: 60, influence: 0.2, chance: 0.5 },
+      Research: { amount: 90, influence: 1, chance: 1 },
+    },
   },
   {
     name: "Community Outreach",
@@ -190,6 +245,13 @@ export const activities: Activity[] = [
       conscientiousness: 55,
       agreeableness: 75,
       neuroticism: 40,
+    },
+    reward: {
+      SocialExperience: { amount: 80, influence: 0.5, chance: 1 },
+      Connection: { amount: 40, influence: 0.6, chance: 0.9 },
+      Reputation: { amount: 30, influence: 0.8, chance: 0.8 },
+      Trust: { amount: 25, influence: 0.4, chance: 0.7 },
+      Popularity: { amount: 20, influence: 0.2, chance: 0.6 },
     },
     interestBonus: ["helping", "social-dynamics"],
     description: "High energy, varied interactions",
@@ -211,6 +273,12 @@ export const activities: Activity[] = [
       agreeableness: 60,
       neuroticism: 50,
     },
+    reward: {
+      Order: { amount: 11, influence: 1, chance: 1 },
+      Momentum: { amount: 3, influence: 1, chance: 0.9 },
+      Infrastructure: { amount: 5, influence: 0.8, chance: 0.6 },
+      Reputation: { amount: 2, influence: 0.2, chance: 0.5 },
+    },
     interestBonus: ["routine", "cooking"],
     description: "Consistent, predictable rhythm",
   },
@@ -230,6 +298,14 @@ export const activities: Activity[] = [
       conscientiousness: 50,
       agreeableness: 45,
       neuroticism: 35,
+    },
+    reward: {
+      Ideas: { amount: 20, influence: 0.9, chance: 1 },
+      Innovation: { amount: 12, influence: 0.9, chance: 0.8 },
+      Insight: { amount: 6, influence: 1, chance: 0.6 },
+      AnalyticalExperience: { amount: 3, influence: 1, chance: 1 },
+      Research: { amount: 4, influence: 1, chance: 0.5 },
+      Knowledge: { amount: 2, influence: 1, chance: 0.7 },
     },
     interestBonus: ["self-discovery", "observation"],
     description: "Bursts of insight, unpredictable flow",
@@ -251,6 +327,12 @@ export const activities: Activity[] = [
       neuroticism: 20,
       intellect: 50,
     },
+    reward: {
+      Wisdom: { amount: 2, influence: 1, chance: 0.1 },
+      Clarity: { amount: 3, influence: 1, chance: 1 },
+      Focus: { amount: 4, influence: 1, chance: 0.8 },
+      Insight: { amount: 1, influence: 0.1, chance: 0.3 },
+    },
     interestBonus: ["self-discovery", "solitude"],
     description: "Quiet reflection, internal focus",
   },
@@ -265,11 +347,16 @@ export const activities: Activity[] = [
       creativity: 10,
       focus: 10,
       intellect: 50,
-      openness: 0,
-      conscientiousness: 0,
-      extraversion: 0,
-      agreeableness: 0,
-      neuroticism: 0,
+      openness: 1,
+      conscientiousness: 1,
+      extraversion: 1,
+      agreeableness: 1,
+      neuroticism: 1,
+    },
+    reward: {
+      Money: { amount: 5, influence: 0.01, chance: 1 },
+      SocialExperience: { amount: 1, influence: 0.01, chance: 0.2 },
+      Beauty: { amount: 2, influence: 1, chance: 0.5 },
     },
     interestBonus: [],
     description: "A task with no requirements",

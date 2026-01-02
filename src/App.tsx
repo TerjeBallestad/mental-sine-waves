@@ -15,21 +15,29 @@ import {
   type Activity,
   type Character,
   type CharacterTraits,
-  type RewardData,
+  type Resource,
 } from "./Data";
 import { Wave } from "./Wave";
 import { clsx } from "clsx";
 
 const ResonanceSystem = () => {
   const timeStep = 0.15;
-  const timeInterval = 50; // ms
+  const timeInterval = 250; // ms
 
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedChar, setSelectedChar] = useState(0);
   const [currentTraits, setCurrentTraits] = useState(emptyTraits);
   const [selectedActivity, setSelectedActivity] = useState(0);
-  const [recentRewards, setRecentRewards] = useState(Array<RewardData>());
+  const [recentRewards, setRecentRewards] =
+    useState(
+      Array<{
+        resource: string;
+        amount: number;
+        time: number;
+        resonance: number;
+      }>(),
+    );
   const [showMapping, setShowMapping] = useState(false);
   const [currentResonance, setCurrentResonance] = useState(0);
 
@@ -161,6 +169,8 @@ const ResonanceSystem = () => {
     ) => {
       const charWave = traitsToWave(t, charTraits);
       const maxSamples = 5;
+
+      // Remap the values
       const samples = Math.round(
         ((charTraits.workingMemory - 1) * (maxSamples - 1)) / (100 - 1) + 1,
       );
@@ -173,7 +183,11 @@ const ResonanceSystem = () => {
       for (let i = 0; i < samples; i++) {
         const sampleTime = t - i * 0.15;
         const sampleValue = traitsToWave(sampleTime, actRequirements);
-        const difference = Math.abs(charWave - sampleValue);
+        const difference = Math.min(
+          1,
+          Math.abs(charWave - sampleValue) +
+            (1 - currentTraits.intellect / 0.4 / 100),
+        );
         const waveAlignment = 1 - difference;
         if (waveAlignment > highestResonance) {
           highestResonance = waveAlignment;
@@ -199,7 +213,7 @@ const ResonanceSystem = () => {
 
       return Math.max(0, Math.min(1, highestResonance));
     },
-    [traitsToWave],
+    [currentTraits, traitsToWave],
   );
 
   /**
@@ -210,29 +224,6 @@ const ResonanceSystem = () => {
       char.interests.includes(interest),
     );
   };
-
-  /**
-   *Generate reward based on resonance
-   */
-  const generateReward = useCallback((resonance: number) => {
-    // Base reward from resonance (30-100 range)
-    const baseReward = resonance * 100;
-
-    // Interest bonus: flat +20 points
-    // const interestBonus = hasInterestBonus(char, activity) ? 20 : 0;
-    const interestBonus = 20;
-
-    // Add small random variation (±10%) - natural performance fluctuation
-    // const variation = (Math.random() - 0.5) * 0.2;
-    const finalReward = Math.max(0, baseReward + interestBonus);
-
-    return {
-      amount: Math.round(finalReward),
-      base: Math.round(baseReward),
-      bonus: interestBonus,
-      resonance: resonance,
-    };
-  }, []);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -245,37 +236,6 @@ const ResonanceSystem = () => {
   }, [isRunning]);
 
   useEffect(() => {
-    const activity = activities[selectedActivity];
-    const resonance = calculateResonance(
-      currentTraits,
-      activity.requirements,
-      time,
-    );
-
-    setCurrentResonance(resonance);
-    const reward = generateReward(resonance);
-
-    setRecentRewards((prev) => [
-      {
-        value: reward.amount,
-        base: reward.base,
-        bonus: reward.bonus,
-        time: Date.now(),
-        resonance: reward.resonance,
-      },
-      ...prev.slice(0, 50),
-    ]);
-  }, [
-    calculateResonance,
-    generateReward,
-    selectedActivity,
-    selectedChar,
-    time,
-    isRunning,
-    currentTraits,
-  ]);
-
-  useEffect(() => {
     const char = characters[selectedChar];
     setCurrentTraits(char.traits);
   }, [selectedChar]);
@@ -284,6 +244,93 @@ const ResonanceSystem = () => {
 
   const char = characters[selectedChar];
   const activity = activities[selectedActivity];
+
+  /**
+   *Generate reward based on resonance
+   */
+  const calculateProgress = useCallback(
+    (resonance: number) => {
+      // Base reward from resonance (30-100 range)
+      const baseReward = resonance;
+
+      // Interest bonus: flat +20 points
+      const interestBonus = hasInterestBonus(char, activity) ? 0.2 : 0;
+
+      // Add small random variation (±10%) - natural performance fluctuation
+      // const variation = (Math.random() - 0.5) * 0.2;
+      const finalProgress = Math.min(
+        Math.max(0, baseReward + interestBonus),
+        1,
+      );
+
+      // return {
+      //   amount: Math.round(finalProgress),
+      //   base: Math.round(baseReward),
+      //   bonus: interestBonus,
+      //   resonance: resonance,
+      // };
+      let selectedResource = "none" as Resource;
+      let highestScore = 0;
+      Object.entries(activity.reward).forEach(([key, value]) => {
+        const score = Math.random() * value.chance;
+        console.log(key, value, score);
+        if (score > highestScore) {
+          selectedResource = key as Resource;
+          highestScore = score;
+        }
+      });
+
+      const finalReward = activity.reward[selectedResource];
+
+      return [
+        selectedResource,
+        Math.floor(
+          (finalReward?.amount ?? 0) *
+            (1 - (1 - finalProgress) * (finalReward?.influence ?? 0)),
+        ),
+      ] as [Resource, number];
+
+      // return Object.fromEntries(
+      //   Object.entries(activity.reward).map(([key, value]) => [
+      //     key,
+      //     value.amount * (1 - (1 - finalProgress) * value.influence),
+      //   ]),
+      // );
+    },
+    [activity, char],
+  );
+
+  useEffect(() => {
+    const activity = activities[selectedActivity];
+    const resonance = calculateResonance(
+      currentTraits,
+      activity.requirements,
+      time,
+    );
+
+    setCurrentResonance(resonance);
+    const [resource, amount] = calculateProgress(resonance);
+
+    console.log();
+
+    setRecentRewards((prev) => [
+      {
+        resource,
+        amount,
+        time: Date.now(),
+        resonance,
+      },
+      ...prev.slice(0, 50),
+    ]);
+  }, [
+    calculateResonance,
+    calculateProgress,
+    selectedActivity,
+    selectedChar,
+    time,
+    isRunning,
+    currentTraits,
+  ]);
 
   const hasBonus = hasInterestBonus(char, activity);
 
@@ -341,13 +388,13 @@ const ResonanceSystem = () => {
   const avgReward =
     recentRewards.length > 0
       ? Math.round(
-          recentRewards.reduce((sum, r) => sum + r.value, 0) /
+          recentRewards.reduce((sum, r) => sum + r.amount, 0) /
             recentRewards.length,
         )
       : 0;
 
   return (
-    <div className="bg-base-200 mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <div className="bg-base-200 mx-auto flex w-full max-w-6xl flex-col gap-6 pb-20">
       <div className="card card-border bg-base-100 mb-6 shadow-lg">
         <div className="card-body">
           <h1 className="card-title">Trait-Based Resonance System</h1>
@@ -449,7 +496,7 @@ const ResonanceSystem = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedActivity(idx)}
-                className="border-neutral rounded-lg border p-3 text-left transition-colors hover:bg-gray-100"
+                className="border-neutral hover:bg-neutral rounded-lg border p-3 text-left transition-colors"
                 style={{
                   borderColor: selectedActivity === idx ? a.color : undefined,
                 }}
@@ -554,11 +601,17 @@ const ResonanceSystem = () => {
             </div>
             <div className="flex items-baseline gap-3">
               <div className="text-primary text-5xl font-bold">
-                {recentRewards.length > 0 ? recentRewards[0].value : "--"}
+                {recentRewards.length > 0 ? (
+                  <>
+                    <div>{recentRewards[0].resource}</div>
+                    <div>{Math.round(recentRewards[0].amount)}</div>
+                  </>
+                ) : (
+                  "--"
+                )}
               </div>
               {hasBonus && (
                 <div className="bg-success rounded px-2 py-1 text-sm text-green-900">
-                  +{recentRewards.length > 0 ? recentRewards[0].bonus : 20}{" "}
                   Interest Bonus!
                 </div>
               )}
@@ -586,17 +639,18 @@ const ResonanceSystem = () => {
                   className={clsx(
                     "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm",
                     {
-                      "bg-success": reward.resonance > 0.65,
                       "bg-warning":
-                        reward.resonance > 0.45 && reward.resonance <= 0.65,
-                      "bg-error": reward.resonance <= 0.45,
+                        reward.resonance < 0.2 && reward.resonance > 0.1,
+                      "bg-error": reward.resonance <= 0.1,
+                      "bg-success": reward.resonance >= 0.19,
                     },
                   )}
                   style={{
                     opacity: 1 - idx * 0.02,
                   }}
                 >
-                  {reward.value}
+                  <div>{reward.resource}</div>
+                  <div>{Math.round(reward.amount)}</div>
                 </div>
               ))}
             </div>
