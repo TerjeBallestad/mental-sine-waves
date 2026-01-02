@@ -6,6 +6,7 @@ import {
   Sparkles,
   Info,
   ArrowRight,
+  CircleUser,
 } from "lucide-react";
 import {
   activities,
@@ -17,6 +18,7 @@ import {
   type RewardData,
 } from "./Data";
 import { Wave } from "./Wave";
+import { clsx } from "clsx";
 
 const ResonanceSystem = () => {
   const timeStep = 0.15;
@@ -286,17 +288,17 @@ const ResonanceSystem = () => {
   const hasBonus = hasInterestBonus(char, activity);
 
   // Generate wave visualization
-  const points = 400;
+  const resolution = 400;
   const generateVisualWaveData = <T extends object | number>(
     waveFn: (t: number, data: T) => number,
     time: number,
     data: T,
-    points: number,
+    res: number,
   ) =>
-    Array.from({ length: points }, (_, i) => {
-      const t = time - (i / points) * 12;
+    Array.from({ length: res }, (_, i) => {
+      const t = time - (i / res) * 12;
       return {
-        x: points - i,
+        x: res - i,
         y: 50 + waveFn(t, data) * 48,
       };
     });
@@ -305,34 +307,35 @@ const ResonanceSystem = () => {
     traitsToWave,
     time,
     currentTraits,
-    points,
+    resolution,
   );
+
   const actWaveData = generateVisualWaveData(
     traitsToWave,
     time,
     activity.requirements,
-    points,
+    resolution,
   );
 
   const divergentThinkingData = generateVisualWaveData(
     makeDivergentThinkingWave,
     time,
     currentTraits,
-    points,
+    resolution,
   );
 
   const convergentThinkingData = generateVisualWaveData(
     makeConvergentThinkingWave,
     time,
     currentTraits,
-    points,
+    resolution,
   );
 
   const attentionSpanData = generateVisualWaveData(
     makeAttentionSpanWave,
     time,
     currentTraits,
-    points,
+    resolution,
   );
 
   const avgReward =
@@ -416,33 +419,17 @@ const ResonanceSystem = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedChar(idx)}
-                className={`flex w-full gap-6 rounded-lg p-3 ${
-                  selectedChar === idx
-                    ? "border-2"
-                    : "bg-neutral border-neutral hover:bg-neutral-active border-2"
-                }`}
+                className="hover:bg-neutral border-base-300 flex w-full gap-6 rounded-lg border p-3"
                 style={{
-                  backgroundColor:
-                    selectedChar === idx ? `${c.color}15` : undefined,
                   borderColor: selectedChar === idx ? c.color : undefined,
                 }}
               >
-                <div
-                  className="avatar avatar-placeholder"
-                  style={{ borderColor: c.color }}
-                >
-                  <div
-                    className="w-18 rounded-full border-2"
-                    style={{
-                      borderColor: c.color,
-                      backgroundColor: c.color + "33",
-                    }}
-                  >
-                    <span className="text-3xl" style={{ color: c.color }}>
-                      {c.name.charAt(0)}
-                    </span>
-                  </div>
-                </div>
+                <CircleUser
+                  size={40}
+                  strokeWidth={0.5}
+                  style={{ color: c.color }}
+                />
+
                 <div className="text-left transition-colors">
                   <div className="text-xl font-semibold">{c.name}</div>
                   <div className="mt-1 opacity-70">{c.description}</div>
@@ -457,32 +444,20 @@ const ResonanceSystem = () => {
 
         <div className="card card-outline bg-base-100 shadow-lg">
           <div className="card-body">
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">
-              Activity
-            </h2>
-            <div className="space-y-2">
-              {activities.map((a, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedActivity(idx)}
-                  className={`w-full rounded-lg p-3 text-left transition-colors ${
-                    selectedActivity === idx
-                      ? "border-2"
-                      : "border-2 border-gray-200 bg-gray-50 hover:bg-gray-100"
-                  }`}
-                  style={{
-                    backgroundColor:
-                      selectedActivity === idx ? `${a.color}15` : undefined,
-                    borderColor: selectedActivity === idx ? a.color : undefined,
-                  }}
-                >
-                  <div className="font-semibold text-gray-800">{a.name}</div>
-                  <div className="mt-1 text-xs text-gray-600">
-                    {a.description}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <h2 className="card-title">Activity</h2>
+            {activities.map((a, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedActivity(idx)}
+                className="border-neutral rounded-lg border p-3 text-left transition-colors hover:bg-gray-100"
+                style={{
+                  borderColor: selectedActivity === idx ? a.color : undefined,
+                }}
+              >
+                <div className="font-semibold">{a.name}</div>
+                <div className="mt-1 text-xs">{a.description}</div>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -570,30 +545,30 @@ const ResonanceSystem = () => {
           </div>
 
           {/* Reward Display */}
-          <div className="mb-4 rounded-lg border-2 border-amber-200 bg-linear-to-br from-amber-50 to-yellow-50 p-6">
+          <div className="from-base-200 to-base-300 border-base-300 mb-4 rounded-lg border-2 bg-linear-to-br p-6">
             <div className="mb-2 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-600" />
-              <span className="font-semibold text-gray-700">
+              <Sparkles className="text-accent h-5 w-5" />
+              <span className="text-accent font-semibold">
                 Resources Generated
               </span>
             </div>
             <div className="flex items-baseline gap-3">
-              <div className="text-5xl font-bold text-amber-600">
+              <div className="text-primary text-5xl font-bold">
                 {recentRewards.length > 0 ? recentRewards[0].value : "--"}
               </div>
               {hasBonus && (
-                <div className="rounded bg-green-100 px-2 py-1 text-sm text-green-700">
+                <div className="bg-success rounded px-2 py-1 text-sm text-green-900">
                   +{recentRewards.length > 0 ? recentRewards[0].bonus : 20}{" "}
                   Interest Bonus!
                 </div>
               )}
             </div>
-            <div className="mt-3 flex justify-between text-sm text-gray-600">
+            <div className="mt-3 flex justify-between text-sm">
               <div>
                 Average (last 15):{" "}
-                <span className="font-semibold text-gray-800">{avgReward}</span>
+                <span className="font-semibold">{avgReward}</span>
               </div>
-              <div className="text-xs text-gray-500">
+              <div>
                 Resonance: {(currentResonance * 100).toFixed(1)}% (hidden)
               </div>
             </div>
@@ -607,16 +582,18 @@ const ResonanceSystem = () => {
             <div className="flex flex-wrap gap-2">
               {recentRewards.map((reward, idx) => (
                 <div
-                  key={reward.time}
-                  className="rounded-lg px-3 py-2 text-sm font-bold shadow-sm"
+                  key={`${idx}-${reward.time}`}
+                  className={clsx(
+                    "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm",
+                    {
+                      "bg-success": reward.resonance > 0.65,
+                      "bg-warning":
+                        reward.resonance > 0.45 && reward.resonance <= 0.65,
+                      "bg-error": reward.resonance <= 0.45,
+                    },
+                  )}
                   style={{
-                    backgroundColor:
-                      reward.resonance > 0.65
-                        ? "#86efac"
-                        : reward.resonance > 0.45
-                          ? "#fde047"
-                          : "#fca5a5",
-                    opacity: 1 - idx * 0.05,
+                    opacity: 1 - idx * 0.02,
                   }}
                 >
                   {reward.value}
