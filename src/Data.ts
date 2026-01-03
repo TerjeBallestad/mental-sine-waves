@@ -1,6 +1,6 @@
 export type CharacterTraits = {
-  workingMemory: number; //no
-  intellect: number; //no
+  workingMemory: number; //yes
+  intellect: number; //yes
   agreeableness: number; //no
   attentionSpan: number; //yes
   processingSpeed: number; //yes
@@ -110,7 +110,7 @@ export const emptyTraits: CharacterTraits = {
   fortitude: 0,
   creativity: 0,
   focus: 0,
-  intellect: 1,
+  intellect: 0,
   openness: 0,
   conscientiousness: 0,
   extraversion: 0,
@@ -224,9 +224,9 @@ export const activities: Activity[] = [
     },
     interestBonus: ["writing", "observation"],
     reward: {
-      Insight: { amount: 10, influence: 1, chance: 0.2 },
-      AnalyticalExperience: { amount: 60, influence: 0.2, chance: 0.5 },
-      Research: { amount: 90, influence: 1, chance: 1 },
+      Insight: { amount: 1, influence: 1, chance: 0.2 },
+      AnalyticalExperience: { amount: 10, influence: 0.2, chance: 0.5 },
+      Research: { amount: 13, influence: 1, chance: 1 },
     },
   },
   {

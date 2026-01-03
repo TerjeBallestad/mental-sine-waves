@@ -28,6 +28,7 @@ const ResonanceSystem = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [selectedChar, setSelectedChar] = useState(0);
   const [currentTraits, setCurrentTraits] = useState(emptyTraits);
+  const [adaption, setAdaption] = useState(emptyTraits);
   const [selectedActivity, setSelectedActivity] = useState(0);
   const [recentRewards, setRecentRewards] =
     useState(
@@ -40,6 +41,22 @@ const ResonanceSystem = () => {
     );
   const [showMapping, setShowMapping] = useState(false);
   const [currentResonance, setCurrentResonance] = useState(0);
+
+  const sumTraits = (a: CharacterTraits, b: CharacterTraits) => {
+    return Object.keys(a).reduce((output, key) => {
+      const typedKey = key as keyof CharacterTraits;
+      output[typedKey] = a[typedKey] + b[typedKey];
+      return output;
+    }, {} as CharacterTraits);
+  };
+
+  const subtractTraits = (a: CharacterTraits, b: CharacterTraits) => {
+    return Object.keys(a).reduce((output, key) => {
+      const typedKey = key as keyof CharacterTraits;
+      output[typedKey] = a[typedKey] - b[typedKey];
+      return output;
+    }, {} as CharacterTraits);
+  };
 
   const sineWaveGenerator = (
     t: number,
@@ -120,7 +137,6 @@ const ResonanceSystem = () => {
         processingSpeed,
       }: CharacterTraits,
     ) => {
-      // console.log("Divergence:", divergence);
       const harmonics = [
         makeConvergentThinkingWave(t, {
           focus,
@@ -175,33 +191,21 @@ const ResonanceSystem = () => {
         ((charTraits.workingMemory - 1) * (maxSamples - 1)) / (100 - 1) + 1,
       );
       let highestResonance = 0;
-      console.log(
-        samples,
-        "samples for working memory",
-        charTraits.workingMemory,
-      );
+
       for (let i = 0; i < samples; i++) {
         const sampleTime = t - i * 0.15;
         const sampleValue = traitsToWave(sampleTime, actRequirements);
-        const difference = Math.min(
-          1,
-          Math.abs(charWave - sampleValue) +
-            (1 - currentTraits.intellect / 0.4 / 100),
-        );
+        const difference = Math.abs(charWave - sampleValue);
+        // const difference = Math.min(
+        //   1,
+        //   Math.abs(charWave - sampleValue) +
+        //     (1 - currentTraits.intellect / 0.4 / 100),
+        // );
+
         const waveAlignment = 1 - difference;
         if (waveAlignment > highestResonance) {
           highestResonance = waveAlignment;
         }
-        console.log(
-          "Sample",
-          i,
-          "Time:",
-          sampleTime,
-          "Value:",
-          sampleValue,
-          "Alignment:",
-          waveAlignment,
-        );
       }
 
       // // Wave alignment (how close they are at this moment)
@@ -213,7 +217,7 @@ const ResonanceSystem = () => {
 
       return Math.max(0, Math.min(1, highestResonance));
     },
-    [currentTraits, traitsToWave],
+    [traitsToWave],
   );
 
   /**
@@ -238,7 +242,20 @@ const ResonanceSystem = () => {
   useEffect(() => {
     const char = characters[selectedChar];
     setCurrentTraits(char.traits);
+    setAdaption(emptyTraits);
   }, [selectedChar]);
+
+  // useEffect(() => {
+  //   setCurrentTraits((prev) => {
+  //     const updated = Object.keys(prev).reduce((output, key) => {
+  //       const typedKey = key as keyof CharacterTraits;
+  //       output[typedKey] = prev[typedKey] + adaption[typedKey];
+  //       return output;
+  //     }, {} as CharacterTraits);
+  //     console.log(prev, updated);
+  //     return updated;
+  //   });
+  // }, [adaption]);
 
   console.log("Rendering App at time:", time);
 
@@ -251,7 +268,16 @@ const ResonanceSystem = () => {
   const calculateProgress = useCallback(
     (resonance: number) => {
       // Base reward from resonance (30-100 range)
-      const baseReward = resonance;
+      const baseReward = Math.min(
+        1,
+        activity.requirements.intellect >
+          currentTraits.intellect + adaption.intellect
+          ? resonance -
+              (activity.requirements.intellect -
+                (currentTraits.intellect + adaption.intellect)) /
+                100
+          : resonance,
+      );
 
       // Interest bonus: flat +20 points
       const interestBonus = hasInterestBonus(char, activity) ? 0.2 : 0;
@@ -263,6 +289,13 @@ const ResonanceSystem = () => {
         1,
       );
 
+      // const difference = Math.min(
+      //   1,
+      //   resonance + (1 - currentTraits.intellect / 0.4 / 100),
+      // );
+
+      console.log("base reward 🤹", resonance, baseReward);
+
       // return {
       //   amount: Math.round(finalProgress),
       //   base: Math.round(baseReward),
@@ -273,7 +306,6 @@ const ResonanceSystem = () => {
       let highestScore = 0;
       Object.entries(activity.reward).forEach(([key, value]) => {
         const score = Math.random() * value.chance;
-        console.log(key, value, score);
         if (score > highestScore) {
           selectedResource = key as Resource;
           highestScore = score;
@@ -297,13 +329,13 @@ const ResonanceSystem = () => {
       //   ]),
       // );
     },
-    [activity, char],
+    [activity, adaption.intellect, char, currentTraits.intellect],
   );
 
   useEffect(() => {
     const activity = activities[selectedActivity];
     const resonance = calculateResonance(
-      currentTraits,
+      sumTraits(currentTraits, adaption),
       activity.requirements,
       time,
     );
@@ -311,7 +343,33 @@ const ResonanceSystem = () => {
     setCurrentResonance(resonance);
     const [resource, amount] = calculateProgress(resonance);
 
-    console.log();
+    setAdaption((prev) => {
+      const goal = subtractTraits(activity.requirements, currentTraits);
+
+      const updated = Object.keys(prev).reduce((output, key) => {
+        const typedKey = key as keyof CharacterTraits;
+        output[typedKey] = Math.max(
+          -10,
+          Math.min(
+            10,
+            prev[typedKey] +
+              Math.max(-1, Math.min(1, goal[typedKey] - prev[typedKey])),
+          ),
+        );
+        console.log(
+          "reduce",
+          typedKey,
+          activity.requirements[typedKey],
+          "-",
+          prev[typedKey],
+          "+",
+          currentTraits[typedKey],
+        );
+        return output;
+      }, {} as CharacterTraits);
+      console.log(prev, updated);
+      return updated;
+    });
 
     setRecentRewards((prev) => [
       {
@@ -353,7 +411,7 @@ const ResonanceSystem = () => {
   const charWaveData = generateVisualWaveData(
     traitsToWave,
     time,
-    currentTraits,
+    sumTraits(currentTraits, adaption),
     resolution,
   );
 
@@ -367,21 +425,21 @@ const ResonanceSystem = () => {
   const divergentThinkingData = generateVisualWaveData(
     makeDivergentThinkingWave,
     time,
-    currentTraits,
+    sumTraits(currentTraits, adaption),
     resolution,
   );
 
   const convergentThinkingData = generateVisualWaveData(
     makeConvergentThinkingWave,
     time,
-    currentTraits,
+    sumTraits(currentTraits, adaption),
     resolution,
   );
 
   const attentionSpanData = generateVisualWaveData(
     makeAttentionSpanWave,
     time,
-    currentTraits,
+    sumTraits(currentTraits, adaption),
     resolution,
   );
 
@@ -629,7 +687,7 @@ const ResonanceSystem = () => {
 
           {/* Reward Stream */}
           <div>
-            <div className="mb-2 text-sm font-semibold text-gray-700">
+            <div className="mb-2 text-sm font-semibold">
               Resource Stream (What player sees):
             </div>
             <div className="flex flex-wrap gap-2">
@@ -639,10 +697,10 @@ const ResonanceSystem = () => {
                   className={clsx(
                     "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm",
                     {
+                      "bg-success": reward.resonance > 0.65,
                       "bg-warning":
-                        reward.resonance < 0.2 && reward.resonance > 0.1,
-                      "bg-error": reward.resonance <= 0.1,
-                      "bg-success": reward.resonance >= 0.19,
+                        reward.resonance > 0.45 && reward.resonance <= 0.65,
+                      "bg-error": reward.resonance <= 0.45,
                     },
                   )}
                   style={{
