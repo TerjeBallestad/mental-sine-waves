@@ -169,7 +169,7 @@ const ResonanceSystem = () => {
           Math.min(
             10,
             prev[typedKey] +
-              Math.max(-0.1, Math.min(0.1, goal[typedKey] - prev[typedKey])),
+              Math.max(-1, Math.min(1, goal[typedKey] - prev[typedKey])),
           ),
         );
         console.log(

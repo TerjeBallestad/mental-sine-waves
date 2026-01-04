@@ -37,7 +37,7 @@ export const makeDivergentThinkingWave = (
   return sineWaveGenerator(t, {
     amplitude: fortitude,
     frequency: (creativity + 0.2) * 0.8,
-    phase: extraversion,
+    phase: extraversion * 0.3,
     verticalShift: openness,
   });
 };
@@ -49,7 +49,7 @@ export const makeConvergentThinkingWave = (
   return sineWaveGenerator(t, {
     amplitude: fortitude,
     frequency: focus * 0.3,
-    phase: conscientiousness,
+    phase: conscientiousness * 0.3,
     verticalShift: neuroticism,
   });
 };
