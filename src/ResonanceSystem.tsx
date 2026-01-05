@@ -12,14 +12,14 @@ import {
   activities,
   characters,
   emptyTraits,
-  type Activity,
-  type Character,
   type CharacterTraits,
-  type Resource,
 } from "./Data";
 import { Wave } from "./Wave";
 import { clsx } from "clsx";
 import {
+  calculateProgress,
+  calculateResonance,
+  hasInterestBonus,
   makeAttentionSpanWave,
   makeConvergentThinkingWave,
   makeDivergentThinkingWave,
@@ -28,9 +28,9 @@ import {
   traitsToWave,
 } from "./FunctionLibrary";
 
-const ResonanceSystem = () => {
+export const ResonanceSystem = () => {
   const timeStep = 0.15;
-  const timeInterval = 250; // ms
+  const timeInterval = 50; // ms
   const resolution = 400; // amount of points on the sine wave
 
   const [time, setTime] = useState(0);
@@ -49,46 +49,6 @@ const ResonanceSystem = () => {
       }>(),
     );
   const [showMapping, setShowMapping] = useState(false);
-
-  /**
-   *Calculate how well character traits match activity requirements
-   */
-  const calculateResonance = (
-    charTraits: CharacterTraits,
-    actRequirements: CharacterTraits,
-    t: number,
-  ) => {
-    const charWave = traitsToWave(t, charTraits);
-    const maxSamples = 5;
-
-    // Remap the values
-    const samples = Math.round(
-      ((charTraits.workingMemory - 1) * (maxSamples - 1)) / (100 - 1) + 1,
-    );
-    let highestResonance = 0;
-
-    for (let i = 0; i < samples; i++) {
-      const sampleTime = t - i * 0.15;
-      const sampleValue = traitsToWave(sampleTime, actRequirements);
-      const difference = Math.abs(charWave - sampleValue);
-
-      const waveAlignment = 1 - difference;
-      if (waveAlignment > highestResonance) {
-        highestResonance = waveAlignment;
-      }
-    }
-
-    return Math.max(0, Math.min(1, highestResonance));
-  };
-
-  /**
-   * Check interest bonus
-   */
-  const hasInterestBonus = (char: Character, activity: Activity) => {
-    return activity.interestBonus.some((interest: string) =>
-      char.interests.includes(interest),
-    );
-  };
 
   console.log("Rendering App at time:", time);
 
@@ -109,56 +69,6 @@ const ResonanceSystem = () => {
     setCurrentTraits(char.traits);
   }, [char]);
 
-  /**
-   *Generate reward based on resonance
-   */
-  const calculateProgress = (resonance: number) => {
-    const baseReward = Math.min(
-      1,
-      activity.requirements.intellect >
-        currentTraits.intellect + adaption.intellect
-        ? resonance -
-            (activity.requirements.intellect -
-              (currentTraits.intellect + adaption.intellect)) /
-              100
-        : resonance,
-    );
-
-    const interestBonus = hasInterestBonus(char, activity) ? 0.2 : 0;
-
-    const finalProgress = Math.min(Math.max(0, baseReward + interestBonus), 1);
-
-    console.log("base reward 🤹", resonance, baseReward);
-
-    let selectedResource = "none" as Resource;
-    let highestScore = 0;
-    Object.entries(activity.reward).forEach(([key, value]) => {
-      const score = Math.random() * value.chance;
-      if (score > highestScore) {
-        selectedResource = key as Resource;
-        highestScore = score;
-      }
-    });
-
-    const finalReward = activity.reward[selectedResource];
-
-    return [
-      selectedResource,
-      Math.floor(
-        (finalReward?.amount ?? 0) *
-          (1 - (1 - finalProgress) * (finalReward?.influence ?? 0)),
-      ),
-    ] as [Resource, number];
-  };
-  const finalTraits = sumTraits(currentTraits, adaption);
-
-  const currentResonance = calculateResonance(
-    finalTraits,
-    activity.requirements,
-    time,
-  );
-  const [resource, amount] = calculateProgress(currentResonance);
-
   useEffect(() => {
     const goal = subtractTraits(activity.requirements, currentTraits);
     setAdaption((prev) =>
@@ -172,21 +82,28 @@ const ResonanceSystem = () => {
               Math.max(-1, Math.min(1, goal[typedKey] - prev[typedKey])),
           ),
         );
-        console.log(
-          "reduce",
-          typedKey,
-          activity.requirements[typedKey],
-          "-",
-          prev[typedKey],
-          "+",
-          currentTraits[typedKey],
-        );
+
         return output;
       }, {} as CharacterTraits),
     );
   }, [activity, currentTraits, time]);
 
+  const finalTraits = sumTraits(currentTraits, adaption);
+
+  const currentResonance = calculateResonance(
+    time,
+    finalTraits,
+    activity.requirements,
+  );
+
   useEffect(() => {
+    const [resource, amount] = calculateProgress(
+      char,
+      finalTraits,
+      activity,
+      currentResonance,
+    );
+
     setRecentRewards((prev) => [
       {
         resource,
@@ -196,7 +113,7 @@ const ResonanceSystem = () => {
       },
       ...prev.slice(0, 50),
     ]);
-  }, [currentResonance, resource, amount]);
+  }, [time]);
 
   const hasBonus = hasInterestBonus(char, activity);
 
@@ -759,5 +676,3 @@ const ResonanceSystem = () => {
     </div>
   );
 };
-
-export default ResonanceSystem;

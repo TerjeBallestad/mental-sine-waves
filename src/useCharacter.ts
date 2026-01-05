@@ -1,22 +1,54 @@
-import { useEffect, useState } from "react";
-import { activities, characters } from "./Data";
-import { subtractTraits, sumTraits } from "./FunctionLibrary";
+import { useState } from "react";
+import { activities, characters, type CharacterTraits } from "./Data";
+import {
+  calculateProgress,
+  calculateResonance,
+  subtractTraits,
+  sumTraits,
+} from "./FunctionLibrary";
 
 export const useCharacter = (
   time: number,
+  adaptionRating: number,
   selectedIndex: number,
   selectedActivity: number,
 ) => {
   const { traits: baseTraits } = characters[selectedIndex];
   const { requirements } = activities[selectedActivity];
-  const [adaption, setAdaption] = useState(0);
+  const [prevAdaptionRating, setPrevAdaptionRating] = useState(adaptionRating);
+  // const [adaption, setAdaption] = useState(emptyTraits);
 
   const goal = subtractTraits(requirements, baseTraits);
-  useEffect(() => {}, [time]);
-  const adaptionTraits = sumTraits(goal, baseTraits);
 
-  setAdaption((prev) => prev + 1);
-  return [baseTraits, adaption, adaptionTraits];
+  const adaption = (Object.keys(goal) as Array<keyof CharacterTraits>).reduce(
+    (output, key) => {
+      output[key] = Math.max(
+        -adaptionRating,
+        Math.min(adaptionRating, goal[key]),
+      );
+      return output;
+    },
+    {} as CharacterTraits,
+  );
+
+  if (adaptionRating !== prevAdaptionRating) {
+    setPrevAdaptionRating(adaptionRating);
+  }
+  console.log("hello");
+
+  // useEffect(() => {
+  //   console.log("time also");
+  // }, [time]);
+  const traits = sumTraits(adaption, baseTraits);
+  const resonance = calculateResonance(time, traits, requirements);
+  const [resource, amount] = calculateProgress(
+    characters[selectedIndex],
+    traits,
+    activities[selectedActivity],
+    resonance,
+  );
+
+  return [traits, resource, amount, resonance];
 };
 
 //   useEffect(() => {

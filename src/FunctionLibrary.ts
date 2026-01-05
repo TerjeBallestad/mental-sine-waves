@@ -1,4 +1,4 @@
-import type { CharacterTraits } from "./Data";
+import type { Activity, Character, CharacterTraits, Resource } from "./Data";
 
 export const sineWaveGenerator = (
   t: number,
@@ -70,6 +70,12 @@ export const subtractTraits = (a: CharacterTraits, b: CharacterTraits) => {
   }, {} as CharacterTraits);
 };
 
+export const compareTraits = (a: CharacterTraits, b: CharacterTraits) => {
+  return (Object.keys(a) as Array<keyof CharacterTraits>).every(
+    (key) => a[key] === b[key],
+  );
+};
+
 export const traitsToWave = (
   t: number,
   {
@@ -114,4 +120,85 @@ export const traitsToWave = (
   });
 
   return value / totalHarmonics;
+};
+
+/**
+ *Generate reward based on resonance
+ */
+export const calculateProgress = (
+  char: Character,
+  currentTraits: CharacterTraits,
+  activity: Activity,
+  resonance: number,
+) => {
+  const baseReward = Math.min(
+    1,
+    activity.requirements.intellect > currentTraits.intellect
+      ? resonance -
+          (activity.requirements.intellect - currentTraits.intellect) / 100
+      : resonance,
+  );
+  const interestBonus = hasInterestBonus(char, activity) ? 0.2 : 0;
+
+  const finalProgress = Math.min(Math.max(0, baseReward + interestBonus), 1);
+
+  let selectedResource = "none" as Resource;
+  let highestScore = 0;
+  Object.entries(activity.reward).forEach(([key, value]) => {
+    const score = Math.random() * value.chance;
+    if (score > highestScore) {
+      selectedResource = key as Resource;
+      highestScore = score;
+    }
+  });
+
+  const finalReward = activity.reward[selectedResource];
+
+  return [
+    selectedResource,
+    Math.floor(
+      (finalReward?.amount ?? 0) *
+        (1 - (1 - finalProgress) * (finalReward?.influence ?? 0)),
+    ),
+  ] as [Resource, number];
+};
+
+/**
+ *Calculate how well character traits match activity requirements
+ */
+export const calculateResonance = (
+  t: number,
+  charTraits: CharacterTraits,
+  actRequirements: CharacterTraits,
+) => {
+  const charWave = traitsToWave(t, charTraits);
+  const maxSamples = 5;
+
+  // Remap the values
+  const samples = Math.round(
+    ((charTraits.workingMemory - 1) * (maxSamples - 1)) / (100 - 1) + 1,
+  );
+  let highestResonance = 0;
+
+  for (let i = 0; i < samples; i++) {
+    const sampleTime = t - i * 0.15;
+    const sampleValue = traitsToWave(sampleTime, actRequirements);
+    const difference = Math.abs(charWave - sampleValue);
+
+    const waveAlignment = 1 - difference;
+    if (waveAlignment > highestResonance) {
+      highestResonance = waveAlignment;
+    }
+  }
+
+  return Math.max(0, Math.min(1, highestResonance));
+};
+
+/**
+ * Check interest bonus
+ */
+export const hasInterestBonus = (char: Character, activity: Activity) => {
+  return activity.interestBonus.some((interest: string) =>
+    char.interests.includes(interest),
+  );
 };
