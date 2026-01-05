@@ -1,4 +1,4 @@
-import type { Character, CharacterTraits } from "../data/Data";
+import type { Character, CharacterTraits } from "../data/Characters";
 import type { Resource } from "../data/Resources";
 import type { Activity } from "../data/Activities";
 

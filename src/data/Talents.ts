@@ -1,4 +1,4 @@
-import type { CharacterTraits } from "./Data";
+import type { CharacterTraits } from "./Characters";
 
 export type TalentEffectConfig = {
   traitModifiers?: Partial<CharacterTraits>;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCharacter } from "../functions/useCharacter";
-import { characters } from "../data/Data";
+import { characters } from "../data/Characters";
 import { activities } from "../data/Activities";
 import {
   generateVisualWaveData,

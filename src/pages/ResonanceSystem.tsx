@@ -8,7 +8,11 @@ import {
   ArrowRight,
   CircleUser,
 } from "lucide-react";
-import { characters, emptyTraits, type CharacterTraits } from "../data/Data";
+import {
+  characters,
+  emptyTraits,
+  type CharacterTraits,
+} from "../data/Characters";
 import { activities } from "../data/Activities";
 import { Wave } from "../components/Wave";
 import { clsx } from "clsx";
