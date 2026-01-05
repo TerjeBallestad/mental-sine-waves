@@ -1,11 +1,17 @@
-import { useState } from "react";
-import { activities, characters, type CharacterTraits } from "./Data";
+import { useEffect, useReducer, useState } from "react";
+import {
+  activities,
+  characters,
+  zeroResources,
+  type CharacterTraits,
+} from "./Data";
 import {
   calculateProgress,
   calculateResonance,
   subtractTraits,
   sumTraits,
 } from "./FunctionLibrary";
+import { resourceReducer } from "./ResourceReducer";
 
 export const useCharacter = (
   time: number,
@@ -13,12 +19,22 @@ export const useCharacter = (
   selectedIndex: number,
   selectedActivity: number,
 ) => {
-  const { traits: baseTraits } = characters[selectedIndex];
-  const { requirements } = activities[selectedActivity];
+  const char = characters[selectedIndex];
+  const activity = activities[selectedActivity];
+  const { traits: baseTraits } = char;
+  const { requirements } = activity;
   const [prevAdaptionRating, setPrevAdaptionRating] = useState(adaptionRating);
-  // const [adaption, setAdaption] = useState(emptyTraits);
+
+  const [resources, dispatchResources] = useReducer(
+    resourceReducer,
+    zeroResources,
+  );
 
   const goal = subtractTraits(requirements, baseTraits);
+
+  if (adaptionRating !== prevAdaptionRating) {
+    setPrevAdaptionRating(adaptionRating);
+  }
 
   const adaption = (Object.keys(goal) as Array<keyof CharacterTraits>).reduce(
     (output, key) => {
@@ -30,10 +46,6 @@ export const useCharacter = (
     },
     {} as CharacterTraits,
   );
-
-  if (adaptionRating !== prevAdaptionRating) {
-    setPrevAdaptionRating(adaptionRating);
-  }
   console.log("hello");
 
   // useEffect(() => {
@@ -42,13 +54,17 @@ export const useCharacter = (
   const traits = sumTraits(adaption, baseTraits);
   const resonance = calculateResonance(time, traits, requirements);
   const [resource, amount] = calculateProgress(
-    characters[selectedIndex],
+    char,
     traits,
-    activities[selectedActivity],
+    activity,
     resonance,
   );
 
-  return [traits, resource, amount, resonance];
+  useEffect(() => {
+    dispatchResources({ type: "added", resource, amount });
+  }, [amount, resource, time]);
+
+  return { traits, resource, amount, resonance, resources, dispatchResources };
 };
 
 //   useEffect(() => {

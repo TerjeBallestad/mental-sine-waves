@@ -2,3 +2,49 @@
 @plugin "daisyui" {
   themes: dracula;
 }
+
+.page-grid {
+  --padding-inline: 1rem;
+  --content-max-width: 620px;
+  --breakout-max-width: 1100px;
+
+  --breakout-size: calc(
+    (var(--breakout-max-width) - var(--content-max-width)) / 2
+  );
+
+  display: grid;
+  grid-template-columns:
+    [full-width-start] minmax(var(--padding-inline), 1fr)
+    [breakout-start] minmax(0, var(--breakout-size))
+    [content-start] min(
+      100% - (var(--padding-inline) * 2),
+      var(--content-max-width)
+    )
+    [content-end]
+    minmax(0, var(--breakout-size)) [breakout-end]
+    minmax(var(--padding-inline), 1fr) [full-width-end];
+}
+
+.page-grid > * {
+  grid-column: content;
+}
+
+.full-width {
+  grid-column: full-width;
+}
+
+.breakout {
+  grid-column: breakout;
+}
+
+.content-width {
+  grid-column: content;
+}
+
+.mobile-full-w {
+  grid-column: full-width;
+
+  @media (min-width: 40rem) {
+    grid-column: content;
+  }
+}

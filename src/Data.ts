@@ -18,7 +18,6 @@ export type Resource =
   | "SocialExperience"
   | "TechnicalExperience"
   | "AnalyticalExperience"
-  | "Money"
   | "Ideas"
   | "Information"
   | "Innovation"
@@ -362,3 +361,43 @@ export const activities: Activity[] = [
     description: "A task with no requirements",
   },
 ];
+
+export const zeroResources: Record<Resource, number> = {
+  none: 0,
+  SocialExperience: 0,
+  TechnicalExperience: 0,
+  AnalyticalExperience: 0,
+  Ideas: 0,
+  Information: 0,
+  Innovation: 0,
+  Insight: 0,
+  Knowledge: 0,
+  Research: 0,
+  Truth: 0,
+  Wisdom: 0,
+  Authority: 0,
+  Connection: 0,
+  Influence: 0,
+  Reputation: 0,
+  Trust: 0,
+  Popularity: 0,
+  Beauty: 0,
+  Vision: 0,
+  Wonder: 0,
+  Infrastructure: 0,
+  Materials: 0,
+  Momentum: 0,
+  Money: 0,
+  Order: 0,
+  Plans: 0,
+  Refinement: 0,
+  Clarity: 0,
+  Destruction: 0,
+  Failure: 0,
+  Deconstruction: 0,
+  Legacy: 0,
+  Mastery: 0,
+  Purpose: 0,
+  Focus: 0,
+  Intuition: 0,
+};

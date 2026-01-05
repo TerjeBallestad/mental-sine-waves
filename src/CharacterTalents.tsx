@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCharacter } from "./useCharacter";
+import { activities, characters } from "./Data";
 
 export const CharacterTalents = () => {
   const timeStep = 0.15;
@@ -23,7 +24,7 @@ export const CharacterTalents = () => {
     setAdaption((prev) => prev + 1);
   };
 
-  const [traits, resource, amount, resonance] = useCharacter(
+  const { traits, resource, amount, resonance, resources } = useCharacter(
     time,
     adaption,
     1,
@@ -31,13 +32,29 @@ export const CharacterTalents = () => {
   );
 
   return (
-    <div className="bg-base-200 mx-auto flex w-full max-w-6xl flex-col gap-6 pb-20">
+    <div className="page-grid">
+      <div className="full-width flex justify-end">
+        <div className="tooltip tooltip-bottom mr-200">
+          <div className="tooltip-content grid min-w-300 grid-cols-8">
+            {Object.entries(resources).map(([key, value]) => (
+              <div key={key}>
+                <p>{key}</p>
+                <p>{value}</p>
+              </div>
+            ))}
+          </div>
+          <button className="btn btn-primary">Resources</button>
+        </div>
+      </div>
       <div className="card card-border bg-base-100 mb-6 shadow-lg">
         <div className="card-body">
-          <div>{JSON.stringify(traits)}</div>
-          <div>{JSON.stringify(resource)}</div>
-          <div>{JSON.stringify(amount)}</div>
-          <div>{JSON.stringify(resonance)}</div>
+          <h1 className="card-title">
+            {characters[1].name} - {activities[3].name}
+          </h1>
+          <pre>{JSON.stringify(traits).replaceAll(/['"]/g, " ")}</pre>
+          <p>{JSON.stringify(resource)}</p>
+          <p>{JSON.stringify(amount)}</p>
+          <p>{JSON.stringify(resonance)}</p>
 
           <div>{adaption}</div>
           <button className="btn" onClick={handleAdaptionIncrease}>
