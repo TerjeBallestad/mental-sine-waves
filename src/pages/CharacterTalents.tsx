@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { useCharacter } from "./useCharacter";
-import { characters } from "./Data";
-import { activities } from "./Activities";
-import { generateVisualWaveData, traitsToWave } from "./FunctionLibrary";
+import { useCharacter } from "../functions/useCharacter";
+import { characters } from "../data/Data";
+import { activities } from "../data/Activities";
+import {
+  generateVisualWaveData,
+  traitsToWave,
+} from "../functions/FunctionLibrary";
 
 export const CharacterTalents = () => {
   const timeStep = 0.15;

@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState } from "react";
-import { characters, type CharacterTraits } from "./Data";
-import { zeroResources } from "./Resources";
-import { activities } from "./Activities";
+import { characters, type CharacterTraits } from "../data/Data";
+import { zeroResources } from "../data/Resources";
+import { activities } from "../data/Activities";
 import {
   calculateProgress,
   calculateResonance,

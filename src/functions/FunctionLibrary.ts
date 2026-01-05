@@ -1,6 +1,6 @@
-import type { Character, CharacterTraits } from "./Data";
-import type { Resource } from "./Resources";
-import type { Activity } from "./Activities";
+import type { Character, CharacterTraits } from "../data/Data";
+import type { Resource } from "../data/Resources";
+import type { Activity } from "../data/Activities";
 
 export const sineWaveGenerator = (
   t: number,

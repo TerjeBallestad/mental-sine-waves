@@ -8,9 +8,9 @@ import {
   ArrowRight,
   CircleUser,
 } from "lucide-react";
-import { characters, emptyTraits, type CharacterTraits } from "./Data";
-import { activities } from "./Activities";
-import { Wave } from "./Wave";
+import { characters, emptyTraits, type CharacterTraits } from "../data/Data";
+import { activities } from "../data/Activities";
+import { Wave } from "../components/Wave";
 import { clsx } from "clsx";
 import {
   calculateProgress,
@@ -23,7 +23,7 @@ import {
   subtractTraits,
   sumTraits,
   traitsToWave,
-} from "./FunctionLibrary";
+} from "../functions/FunctionLibrary";
 
 export const ResonanceSystem = () => {
   const timeStep = 0.15;
