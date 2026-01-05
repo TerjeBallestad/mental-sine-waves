@@ -8,17 +8,14 @@ import {
   ArrowRight,
   CircleUser,
 } from "lucide-react";
-import {
-  activities,
-  characters,
-  emptyTraits,
-  type CharacterTraits,
-} from "./Data";
+import { characters, emptyTraits, type CharacterTraits } from "./Data";
+import { activities } from "./Activities";
 import { Wave } from "./Wave";
 import { clsx } from "clsx";
 import {
   calculateProgress,
   calculateResonance,
+  generateVisualWaveData,
   hasInterestBonus,
   makeAttentionSpanWave,
   makeConvergentThinkingWave,
@@ -116,21 +113,6 @@ export const ResonanceSystem = () => {
   }, [time]);
 
   const hasBonus = hasInterestBonus(char, activity);
-
-  // Generate wave visualization
-  const generateVisualWaveData = <T extends object | number>(
-    waveFn: (t: number, data: T) => number,
-    time: number,
-    data: T,
-    res: number,
-  ) =>
-    Array.from({ length: res }, (_, i) => {
-      const t = time - (i / res) * 12;
-      return {
-        x: res - i,
-        y: 50 + waveFn(t, data) * 48,
-      };
-    });
 
   const charWaveData = generateVisualWaveData(
     traitsToWave,

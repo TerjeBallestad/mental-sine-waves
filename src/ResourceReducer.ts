@@ -1,4 +1,4 @@
-import type { Resource } from "./Data";
+import type { Resource } from "./Resources";
 
 export const resourceReducer = (
   resources: Record<Resource, number>,

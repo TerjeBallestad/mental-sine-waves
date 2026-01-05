@@ -1,4 +1,6 @@
-import type { Activity, Character, CharacterTraits, Resource } from "./Data";
+import type { Character, CharacterTraits } from "./Data";
+import type { Resource } from "./Resources";
+import type { Activity } from "./Activities";
 
 export const sineWaveGenerator = (
   t: number,
@@ -202,3 +204,20 @@ export const hasInterestBonus = (char: Character, activity: Activity) => {
     char.interests.includes(interest),
   );
 };
+
+/**
+ *  Generate wave visualization
+ */
+export const generateVisualWaveData = <T extends object | number>(
+  waveFn: (t: number, data: T) => number,
+  time: number,
+  data: T,
+  res: number,
+) =>
+  Array.from({ length: res }, (_, i) => {
+    const t = time - (i / res) * 12;
+    return {
+      x: res - i,
+      y: 50 + waveFn(t, data) * 48,
+    };
+  });

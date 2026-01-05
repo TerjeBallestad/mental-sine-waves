@@ -5,7 +5,7 @@
 
 .page-grid {
   --padding-inline: 1rem;
-  --content-max-width: 620px;
+  --content-max-width: 820px;
   --breakout-max-width: 1100px;
 
   --breakout-size: calc(
