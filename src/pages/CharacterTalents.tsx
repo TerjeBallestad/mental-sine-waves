@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useCharacter } from "../functions/useCharacter";
-import { characters } from "../data/Characters";
+
 import { activities } from "../data/Activities";
 import {
   generateVisualWaveData,
   traitsToWave,
 } from "../functions/FunctionLibrary";
 import { SvgWave, type WaveData } from "../components/Wave";
+import { ActivityView } from "../components/Activity";
 
 export const CharacterTalents = () => {
   const timeStep = 0.15;
@@ -14,7 +15,7 @@ export const CharacterTalents = () => {
   const selectedCharacter = 1;
   const selectedActivity = 1;
   const resolution = 400; // amount of points on the sine wave
-  const char = characters[selectedCharacter];
+  // const char = characters[selectedCharacter];
   const activity = activities[selectedActivity];
 
   const [time, setTime] = useState(0);
@@ -35,12 +36,14 @@ export const CharacterTalents = () => {
     setAdaption((prev) => prev + 1);
   };
 
-  const { traits, resource, amount, resonance, resources } = useCharacter(
-    time,
-    adaption,
-    selectedCharacter,
-    selectedActivity,
-  );
+  const {
+    traits,
+    resource,
+    amount,
+    resonance,
+    resources,
+    character: char,
+  } = useCharacter(time, adaption, selectedCharacter);
 
   const waves = Array<WaveData>(
     {
@@ -60,7 +63,7 @@ export const CharacterTalents = () => {
   );
 
   return (
-    <div className="page-grid">
+    <div className="page-grid gap-y-6">
       <div className="breakout grid grid-cols-subgrid">
         <div className="tooltip tooltip-bottom col-start-3 justify-self-end">
           <div className="tooltip-content grid min-w-300 grid-cols-8">
@@ -74,7 +77,7 @@ export const CharacterTalents = () => {
           <button className="btn btn-primary">Resources</button>
         </div>
       </div>
-      <div className="card card-border bg-base-100 mb-6 shadow-lg">
+      <div className="card card-border bg-base-100 shadow-lg">
         <div className="card-body">
           <h1 className="card-title">
             {char.name} - {activity.name}
@@ -93,7 +96,27 @@ export const CharacterTalents = () => {
         </div>
       </div>
 
+      <div className="card card-border bg-base-100">
+        <div className="card-body">
+          <h1 className="card-title">Activities</h1>
+          <div className="grid grid-cols-4 gap-3">
+            {activities.map((activity) => (
+              <ActivityView activity={activity} />
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Wave Visualization */}
+      <div className="card bg-base-100 shadow-lg">
+        <div className="card-body">
+          <h2 className="card-title mb-4">
+            Mental Rhythm Patterns (Hidden from Player)
+          </h2>
+          <SvgWave waves={waves} />
+        </div>
+      </div>
+
       <div className="card bg-base-100 shadow-lg">
         <div className="card-body">
           <h2 className="card-title mb-4">

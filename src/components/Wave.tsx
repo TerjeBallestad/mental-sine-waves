@@ -51,6 +51,7 @@ export const SvgWave = ({ waves }: SvgWaveProps) => {
         {waves.map((w) => (
           <polyline
             points={w.points.map((p) => `${p.x},${p.y}`).join(" ")}
+            key={w.name}
             fill="none"
             stroke={w.color}
             strokeWidth="2.5"
@@ -60,7 +61,7 @@ export const SvgWave = ({ waves }: SvgWaveProps) => {
       </svg>
       <div className="mt-3 flex justify-between text-sm">
         {waves.map((w) => (
-          <span style={{ color: w.color }} className="font-medium">
+          <span key={w.name} style={{ color: w.color }} className="font-medium">
             ■ {w.name}
           </span>
         ))}

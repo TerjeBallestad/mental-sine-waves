@@ -1,12 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-// import { ResonanceSystem } from "./pages/ResonanceSystem.tsx";
-import { CharacterTalents } from "./pages/CharacterTalents.tsx";
+import { Game } from "./Game.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* <ResonanceSystem /> */}
-    <CharacterTalents />
+    <Game />
   </StrictMode>,
 );

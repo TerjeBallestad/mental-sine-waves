@@ -16,6 +16,10 @@ export class Talent {
   readonly effectConfig: TalentEffectConfig;
   points = 0;
 
+  get Points() {
+    return this.points;
+  }
+
   constructor(
     name: string,
     description: string,
@@ -26,6 +30,10 @@ export class Talent {
     this.description = description;
     this.maxPoints = maxPoints;
     this.effectConfig = effectConfig;
+  }
+
+  update(time: number) {
+    this.points += time;
   }
 
   /**

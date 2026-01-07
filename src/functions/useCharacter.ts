@@ -1,5 +1,5 @@
-import { useEffect, useReducer, useState } from "react";
-import { characters, type CharacterTraits } from "../data/Characters";
+import { useContext, useEffect, useReducer, useState } from "react";
+import { type CharacterTraits } from "../data/Characters";
 import { zeroResources } from "../data/Resources";
 import { activities } from "../data/Activities";
 import {
@@ -9,6 +9,7 @@ import {
   sumTraits,
 } from "./FunctionLibrary";
 import { resourceReducer } from "./ResourceReducer";
+import { CharacterContext } from "../GameStateContext";
 
 /**
  * Custom hook that calculates character traits and resource progression based on activity requirements and adaptation rating.
@@ -16,12 +17,11 @@ import { resourceReducer } from "./ResourceReducer";
 export const useCharacter = (
   time: number,
   adaptionRating: number,
-  selectedIndex: number,
   selectedActivity: number,
 ) => {
-  const char = characters[selectedIndex];
+  const character = useContext(CharacterContext);
   const activity = activities[selectedActivity];
-  const { traits: baseTraits } = char;
+  const { traits: baseTraits } = character;
   const { requirements } = activity;
   const [prevAdaptionRating, setPrevAdaptionRating] = useState(adaptionRating);
 
@@ -51,7 +51,7 @@ export const useCharacter = (
   const traits = sumTraits(adaption, baseTraits);
   const resonance = calculateResonance(time, traits, requirements);
   const [resource, amount] = calculateProgress(
-    char,
+    character,
     traits,
     activity,
     resonance,
@@ -61,5 +61,13 @@ export const useCharacter = (
     dispatchResources({ type: "added", resource, amount });
   }, [amount, resource, time]);
 
-  return { traits, resource, amount, resonance, resources, dispatchResources };
+  return {
+    traits,
+    resource,
+    amount,
+    resonance,
+    resources,
+    dispatchResources,
+    character,
+  };
 };

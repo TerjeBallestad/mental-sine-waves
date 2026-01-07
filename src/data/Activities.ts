@@ -69,7 +69,7 @@ export const activities: Activity[] = [
     requirements: {
       fortitude: 50, // Moderate sustained effort
       focus: 60, // Consistent execution
-      creativity: 100, // Don't need creativity
+      creativity: 8, // Don't need creativity
       attentionSpan: 50,
       processingSpeed: 40,
       workingMemory: 30, // Prefer consistency
