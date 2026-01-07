@@ -6,6 +6,7 @@ import {
   generateVisualWaveData,
   traitsToWave,
 } from "../functions/FunctionLibrary";
+import { SvgWave, type WaveData } from "../components/Wave";
 
 export const CharacterTalents = () => {
   const timeStep = 0.15;
@@ -41,18 +42,21 @@ export const CharacterTalents = () => {
     selectedActivity,
   );
 
-  const charWaveData = generateVisualWaveData(
-    traitsToWave,
-    time,
-    traits,
-    resolution,
-  );
-
-  const actWaveData = generateVisualWaveData(
-    traitsToWave,
-    time,
-    activity.requirements,
-    resolution,
+  const waves = Array<WaveData>(
+    {
+      points: generateVisualWaveData(traitsToWave, time, traits, resolution),
+      ...char,
+    },
+    {
+      points: generateVisualWaveData(
+        traitsToWave,
+        time,
+        activity.requirements,
+        resolution,
+      ),
+      dashed: true,
+      ...activity,
+    },
   );
 
   return (
@@ -95,41 +99,7 @@ export const CharacterTalents = () => {
           <h2 className="card-title mb-4">
             Mental Rhythm Patterns (Hidden from Player)
           </h2>
-          <svg
-            viewBox="0 0 400 100"
-            className="bg-base-200 h-48 w-full rounded shadow-inner"
-          >
-            <line
-              x1="-50"
-              y1="50"
-              x2="450"
-              y2="50"
-              stroke="#e5e7eb"
-              strokeWidth="1"
-              strokeDasharray="2 2"
-            />
-            <polyline
-              points={charWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-              fill="none"
-              stroke={char.color}
-              strokeWidth="2.5"
-            />
-            <polyline
-              points={actWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-              fill="none"
-              stroke={activity.color}
-              strokeWidth="2.5"
-              strokeDasharray="5 3"
-            />
-          </svg>
-          <div className="mt-3 flex justify-between text-sm">
-            <span style={{ color: char.color }} className="font-medium">
-              ■ {char.name}'s rhythm
-            </span>
-            <span style={{ color: activity.color }} className="font-medium">
-              ▪▪▪ {activity.name} demands
-            </span>
-          </div>
+          <SvgWave waves={waves} />
         </div>
       </div>
     </div>

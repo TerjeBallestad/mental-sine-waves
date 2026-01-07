@@ -36,6 +36,47 @@ export const emptyTraits: CharacterTraits = {
   neuroticism: 0,
 };
 
+export class ACharacter {
+  name: string;
+  color: string;
+  traits: CharacterTraits;
+  interests: string[];
+  description?: string;
+
+  constructor(
+    name: string,
+    { color, interests, traits, description }: Omit<Character, "name">,
+  ) {
+    this.name = name;
+    this.color = color;
+    this.traits = traits;
+    this.interests = interests;
+    this.description = description;
+  }
+}
+
+export const elling = new ACharacter("Elling", {
+  color: "#3b82f6",
+  traits: {
+    // Cognitive traits
+    attentionSpan: 45,
+    processingSpeed: 60,
+    workingMemory: 70,
+    fortitude: 40, // → frequency (low stamina = slow, deliberate)
+    creativity: 75, // → harmonics complexity
+    focus: 55, // → amplitude (focused output)
+    intellect: 50,
+    // Personality traits
+    openness: 70,
+    conscientiousness: 60,
+    extraversion: 30,
+    agreeableness: 50,
+    neuroticism: 65,
+  },
+  interests: ["writing", "observation", "solitude"],
+  description: "Anxious, creative, needs routine with breaks",
+});
+
 // Characters with cognitive and personality traits
 export const characters: Character[] = [
   {
@@ -70,6 +111,7 @@ export const characters: Character[] = [
       creativity: 75, // → harmonics complexity
       focus: 55, // → amplitude (focused output)
       intellect: 50,
+      // Personality traits
       openness: 70,
       conscientiousness: 60,
       extraversion: 30,

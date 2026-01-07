@@ -2,8 +2,8 @@ import type { CharacterTraits } from "./Characters";
 import type { Resource, ResourceData } from "./Resources";
 
 export type Activity = {
-  name?: string;
-  color?: string;
+  name: string;
+  color: string;
   requirements: CharacterTraits;
   interestBonus: string[];
   description?: string;

@@ -14,7 +14,7 @@ import {
   type CharacterTraits,
 } from "../data/Characters";
 import { activities } from "../data/Activities";
-import { Wave } from "../components/Wave";
+import { SvgWave, WaveCard, type WaveData } from "../components/Wave";
 import { clsx } from "clsx";
 import {
   calculateProgress,
@@ -31,7 +31,7 @@ import {
 
 export const ResonanceSystem = () => {
   const timeStep = 0.15;
-  const timeInterval = 50; // ms
+  const timeInterval = 250; // ms
   const resolution = 400; // amount of points on the sine wave
 
   const [time, setTime] = useState(0);
@@ -118,18 +118,26 @@ export const ResonanceSystem = () => {
 
   const hasBonus = hasInterestBonus(char, activity);
 
-  const charWaveData = generateVisualWaveData(
-    traitsToWave,
-    time,
-    finalTraits,
-    resolution,
-  );
-
-  const actWaveData = generateVisualWaveData(
-    traitsToWave,
-    time,
-    activity.requirements,
-    resolution,
+  const waves = Array<WaveData>(
+    {
+      points: generateVisualWaveData(
+        traitsToWave,
+        time,
+        finalTraits,
+        resolution,
+      ),
+      ...char,
+    },
+    {
+      points: generateVisualWaveData(
+        traitsToWave,
+        time,
+        activity.requirements,
+        resolution,
+      ),
+      dashed: true,
+      ...activity,
+    },
   );
 
   const divergentThinkingData = generateVisualWaveData(
@@ -283,41 +291,7 @@ export const ResonanceSystem = () => {
           <h2 className="card-title mb-4">
             Mental Rhythm Patterns (Hidden from Player)
           </h2>
-          <svg
-            viewBox="0 0 400 100"
-            className="bg-base-200 h-48 w-full rounded shadow-inner"
-          >
-            <line
-              x1="-50"
-              y1="50"
-              x2="450"
-              y2="50"
-              stroke="#e5e7eb"
-              strokeWidth="1"
-              strokeDasharray="2 2"
-            />
-            <polyline
-              points={charWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-              fill="none"
-              stroke={char.color}
-              strokeWidth="2.5"
-            />
-            <polyline
-              points={actWaveData.map((p) => `${p.x},${p.y}`).join(" ")}
-              fill="none"
-              stroke={activity.color}
-              strokeWidth="2.5"
-              strokeDasharray="5 3"
-            />
-          </svg>
-          <div className="mt-3 flex justify-between text-sm">
-            <span style={{ color: char.color }} className="font-medium">
-              ■ {char.name}'s rhythm
-            </span>
-            <span style={{ color: activity.color }} className="font-medium">
-              ▪▪▪ {activity.name} demands
-            </span>
-          </div>
+          <SvgWave waves={waves} />
         </div>
       </div>
 
@@ -426,9 +400,9 @@ export const ResonanceSystem = () => {
         </div>
       </div>
 
-      <Wave
+      <WaveCard
         points={divergentThinkingData}
-        title="Divergent Thinking"
+        name="Divergent Thinking"
         color={char.color}
       >
         <label className="input w-full">
@@ -507,11 +481,11 @@ export const ResonanceSystem = () => {
             type={"range"}
           />
         </label>
-      </Wave>
+      </WaveCard>
 
-      <Wave
+      <WaveCard
         points={convergentThinkingData}
-        title="Convergent Thinking"
+        name="Convergent Thinking"
         color={char.color}
       >
         <label className="input w-full">
@@ -585,11 +559,11 @@ export const ResonanceSystem = () => {
             type={"range"}
           />
         </label>
-      </Wave>
+      </WaveCard>
 
-      <Wave
+      <WaveCard
         points={attentionSpanData}
-        title="Attention Span"
+        name="Attention Span"
         color={char.color}
       >
         <label className="input w-full">
@@ -628,7 +602,7 @@ export const ResonanceSystem = () => {
             type={"range"}
           />
         </label>
-      </Wave>
+      </WaveCard>
 
       {/* Design Notes */}
       <div className="rounded-lg border border-purple-200 bg-purple-50 p-6">

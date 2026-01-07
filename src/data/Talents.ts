@@ -9,7 +9,7 @@ export type TalentEffectConfig = {
 /**
  * Base Talent class that can be extended for different talent types
  */
-export abstract class Talent {
+export class Talent {
   readonly name: string;
   readonly description: string;
   readonly maxPoints: number;
@@ -124,6 +124,17 @@ export class DeepFocus extends Talent {
     );
   }
 }
+
+export const MemoryMastery2 = new Talent(
+  "Memory Mastery",
+  "Expand your working memory capacity",
+  {
+    traitModifiers: {
+      workingMemory: 10,
+      intellect: 3,
+    },
+  },
+);
 
 export class MemoryMastery extends Talent {
   constructor() {
