@@ -21,6 +21,36 @@ export type CharacterTraits = {
   neuroticism: number; //yes
 };
 
+export type CharacterCack = {
+  animation: number;
+  /*
+  To be effective, humans need a combination of cognitive, emotional, physical, and social resources. These interconnected resources help individuals manage stress, solve problems, maintain relationships, and achieve goals.
+Cognitive Resources
+These are the mental capacities and abilities that enable individuals to perform tasks efficiently.
+Attention Control: The ability to sustain focus amidst distractions is crucial for task completion and quality work.
+Memory: Strong short-term and working memory are linked to better work ability and overall health.
+Problem-Solving Skills: A flexible approach to problem-solving and the ability to think critically are essential for navigating challenges.
+Learning Agility: An openness to new experiences and a willingness to learn new skills boost self-confidence and a sense of purpose.
+Emotional Resources
+These resources relate to understanding and managing feelings and building resilience.
+Emotional Intelligence (EI): The ability to recognize, understand, and manage one's own emotions, as well as empathize with others, is key to navigating social complexities and regulating stress.
+Resilience: The capacity to "bounce back" after failure, adversity, or challenging situations.
+Optimism and Hope: A positive outlook toward the future and the belief that there are alternate pathways to achieve a goal contribute to well-being and a productive mindset.
+Self-Efficacy: The belief in one's own ability to perform tasks and achieve goals, which reinforces motivation.
+Physical Resources
+Physical health directly impacts mental well-being and effectiveness.
+Adequate Sleep: Prioritizing quality sleep is fundamental, as it significantly impacts mood, focus, and the ability to cope with life's demands.
+Physical Activity: Regular exercise reduces stress and depression, improves mood, and enhances self-esteem by causing positive chemical changes in the brain.
+Nutrition: A balanced diet with essential nutrients helps maintain mood and energy levels, while poor eating habits can lead to fatigue and anxiety.
+Mind-Body Practices: Techniques such as mindfulness and meditation help manage stress, improve emotional regulation, and enhance focus.
+Social Resources
+Strong relationships and support systems are vital for mental well-being and effectiveness.
+Strong Connections: Good relationships with friends, family, and colleagues build a sense of belonging, provide emotional support, and allow for shared experiences.
+Support Systems: Having a network of trusted individuals or professionals (mentors, support groups) provides a safety net during challenging times and offers different perspectives.
+Sense of Purpose: Engagement in a community, job, or volunteering can provide a feeling of purpose and self-worth, which supports long-term emotional health
+*/
+};
+
 export type CharacterData = {
   name: string;
   color: string;
@@ -49,6 +79,8 @@ export class ACharacter {
   color: string;
   traits: CharacterTraits;
   currentActivity?: AActivity;
+  adaptionRating = 10;
+
   interests: string[];
 
   description?: string;
@@ -81,7 +113,6 @@ export class ACharacter {
       activity.requirements,
     );
     const [resource, amount] = calculateProgress(this, activity, resonance);
-    console.log(resonance, resource, amount);
 
     this.gameState.addResoure(resource, amount);
   }

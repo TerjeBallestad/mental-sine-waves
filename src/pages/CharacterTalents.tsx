@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { useCharacter } from "../functions/useCharacter";
 
-import { activities } from "../data/Activities";
 import {
   generateVisualWaveData,
   traitsToWave,
 } from "../functions/FunctionLibrary";
 import { SvgWave, type WaveData } from "../components/Wave";
-import { ActivityView } from "../components/Activity";
 import { useGameState } from "../GameState";
 import { emptyTraits } from "../data/Characters";
+import { Activities } from "../components/Activities";
 
 export function CharacterTalents() {
-  const selectedActivity = 1;
   const resolution = 400; // amount of points on the sine wave
 
-  const activity = activities[selectedActivity];
   const { time, selectedCharacter } = useGameState();
   const { traits, currentActivity } = selectedCharacter;
   const requirements = currentActivity?.requirements ?? emptyTraits;
@@ -50,9 +47,7 @@ export function CharacterTalents() {
     <div className="page-grid gap-y-6">
       <div className="card card-border bg-base-100 shadow-lg">
         <div className="card-body">
-          <h1 className="card-title">
-            {selectedCharacter.name} - {activity.name}
-          </h1>
+          <h1 className="card-title">{selectedCharacter.name}</h1>
           <div className="font-mono">
             {JSON.stringify(traits).replaceAll(/['"]/g, " ")}
           </div>
@@ -71,9 +66,7 @@ export function CharacterTalents() {
         <div className="card-body">
           <h1 className="card-title">Activities</h1>
           <div className="grid grid-cols-4 gap-3">
-            {activities.map((activity) => (
-              <ActivityView key={activity.name} activity={activity} />
-            ))}
+            <Activities />
           </div>
         </div>
       </div>
