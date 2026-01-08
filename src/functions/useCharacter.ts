@@ -50,12 +50,7 @@ export const useCharacter = (
 
   const traits = sumTraits(adaption, baseTraits);
   const resonance = calculateResonance(time, traits, requirements);
-  const [resource, amount] = calculateProgress(
-    character,
-    traits,
-    activity,
-    resonance,
-  );
+  const [resource, amount] = calculateProgress(character, activity, resonance);
 
   useEffect(() => {
     dispatchResources({ type: "added", resource, amount });

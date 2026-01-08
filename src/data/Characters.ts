@@ -1,4 +1,10 @@
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable } from "mobx";
+import { getGameState } from "../GameState";
+import type { AActivity } from "./Activities";
+import {
+  calculateProgress,
+  calculateResonance,
+} from "../functions/FunctionLibrary";
 
 export type CharacterTraits = {
   workingMemory: number; //yes
@@ -42,19 +48,42 @@ export class ACharacter {
   name: string;
   color: string;
   traits: CharacterTraits;
+  currentActivity?: AActivity;
   interests: string[];
+
   description?: string;
+
+  private get gameState() {
+    return getGameState();
+  }
 
   constructor(
     name: string,
     { color, interests, traits, description }: Omit<CharacterData, "name">,
   ) {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      doActivity: action,
+    });
     this.name = name;
     this.color = color;
     this.traits = traits;
     this.interests = interests;
     this.description = description;
+  }
+
+  doActivity(activity: AActivity, progress: number) {
+    this.currentActivity = activity;
+    console.log(activity, progress);
+
+    const resonance = calculateResonance(
+      this.gameState.time,
+      this.traits,
+      activity.requirements,
+    );
+    const [resource, amount] = calculateProgress(this, activity, resonance);
+    console.log(resonance, resource, amount);
+
+    this.gameState.addResoure(resource, amount);
   }
 }
 

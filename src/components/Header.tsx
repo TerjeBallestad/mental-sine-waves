@@ -1,14 +1,17 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useGameState } from "../GameState";
 import { Pause, Play } from "lucide-react";
+import { ResourceDropdown } from "./ResourceDropdown";
 
 type HeaderProps = {
   isRunning: boolean;
   setIsRunning: Dispatch<SetStateAction<boolean>>;
 };
 
-export const Header = ({ isRunning, setIsRunning }: HeaderProps) => {
+export function Header({ isRunning, setIsRunning }: HeaderProps) {
   const gameState = useGameState();
+  console.log(gameState.globalResources, "📖");
+
   return (
     <div className="navbar bg-base-200">
       <div className="navbar-start">
@@ -28,20 +31,7 @@ export const Header = ({ isRunning, setIsRunning }: HeaderProps) => {
         </button>
       </div>
       <div className="navbar-end gap-6">
-        <details className="dropdown dropdown-end">
-          <summary className="btn btn-primary">Resources</summary>
-          <ul className="menu dropdown-content bg-base-100 rounded-box z-1 grid min-w-300 grid-cols-8 shadow-sm">
-            {Object.entries(gameState.globalResources).map(([key, value]) => (
-              <li key={key}>
-                <span>
-                  {key}
-                  <br></br>
-                  {value}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </details>
+        <ResourceDropdown />
 
         <div className="flex items-stretch">
           <select
@@ -63,4 +53,4 @@ export const Header = ({ isRunning, setIsRunning }: HeaderProps) => {
       </div>
     </div>
   );
-};
+}

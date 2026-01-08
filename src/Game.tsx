@@ -4,8 +4,8 @@ import { useGameState } from "./GameState";
 
 import { CharacterTalents } from "./pages/CharacterTalents";
 
-export const Game = () => {
-  const timeStep = 0.15;
+export function Game() {
+  const timeStep = 0.05; // hours (3 min)
   const timeInterval = 100; // ms
   const gameState = useGameState();
 
@@ -27,4 +27,4 @@ export const Game = () => {
       <CharacterTalents />;
     </>
   );
-};
+}

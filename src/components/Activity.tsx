@@ -1,30 +1,42 @@
 import { Pause, Play } from "lucide-react";
-import type { ActivityData } from "../data/Activities";
+import type { AActivity } from "../data/Activities";
 import { useEffect, useState } from "react";
+import { useGameState } from "../GameState";
 
 type Props = {
-  activity: ActivityData;
+  activity: AActivity;
 };
 
-export const ActivityView = ({ activity }: Props) => {
+export function ActivityView({ activity }: Props) {
+  const intervalMS = 100;
+  const progressStep = 4;
+  const steps = 100 / progressStep;
+  // const activityIntervals = activity.timeToComplete / intervals
+  const activityStep = activity.timeToComplete / steps;
+
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
 
   console.log("activity render");
+  const gameState = useGameState();
+  if (isRunning) {
+    gameState.update(activityStep);
+    gameState.selectedCharacter.doActivity(activity, progress);
+  }
 
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => {
       setProgress((p) => {
-        const value = p + 4;
-        if (value >= 100) {
+        const value = p + progressStep;
+        if (value > 100) {
           clearInterval(interval);
           setIsRunning(false);
           return 0;
         }
         return value;
       });
-    }, 100);
+    }, intervalMS);
     return () => clearInterval(interval);
   }, [isRunning]);
 
@@ -42,4 +54,4 @@ export const ActivityView = ({ activity }: Props) => {
       </button>
     </div>
   );
-};
+}

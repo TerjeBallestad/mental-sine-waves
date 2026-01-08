@@ -9,15 +9,16 @@ import {
 import { SvgWave, type WaveData } from "../components/Wave";
 import { ActivityView } from "../components/Activity";
 import { useGameState } from "../GameState";
+import { emptyTraits } from "../data/Characters";
 
-export const CharacterTalents = () => {
+export function CharacterTalents() {
   const selectedActivity = 1;
   const resolution = 400; // amount of points on the sine wave
-  // const char = characters[selectedCharacter];
+
   const activity = activities[selectedActivity];
-  const { time, selectedCharacter: char } = useGameState();
-  const traits = char.traits;
-  console.log(time);
+  const { time, selectedCharacter } = useGameState();
+  const { traits, currentActivity } = selectedCharacter;
+  const requirements = currentActivity?.requirements ?? emptyTraits;
 
   const [adaption, setAdaption] = useState(0);
 
@@ -27,29 +28,30 @@ export const CharacterTalents = () => {
 
   const { resource, amount, resonance } = useCharacter(time, adaption, 1);
 
-  const waves = Array<WaveData>(
-    {
-      points: generateVisualWaveData(traitsToWave, time, traits, resolution),
-      ...char,
-    },
-    {
+  const waves = Array<WaveData>({
+    points: generateVisualWaveData(traitsToWave, time, traits, resolution),
+    ...selectedCharacter,
+  });
+
+  if (currentActivity) {
+    waves.push({
       points: generateVisualWaveData(
         traitsToWave,
         time,
-        activity.requirements,
+        requirements,
         resolution,
       ),
       dashed: true,
-      ...activity,
-    },
-  );
+      ...currentActivity,
+    });
+  }
 
   return (
     <div className="page-grid gap-y-6">
       <div className="card card-border bg-base-100 shadow-lg">
         <div className="card-body">
           <h1 className="card-title">
-            {char.name} - {activity.name}
+            {selectedCharacter.name} - {activity.name}
           </h1>
           <div className="font-mono">
             {JSON.stringify(traits).replaceAll(/['"]/g, " ")}
@@ -85,15 +87,6 @@ export const CharacterTalents = () => {
           <SvgWave waves={waves} />
         </div>
       </div>
-
-      <div className="card bg-base-100 shadow-lg">
-        <div className="card-body">
-          <h2 className="card-title mb-4">
-            Mental Rhythm Patterns (Hidden from Player)
-          </h2>
-          <SvgWave waves={waves} />
-        </div>
-      </div>
     </div>
   );
-};
+}
