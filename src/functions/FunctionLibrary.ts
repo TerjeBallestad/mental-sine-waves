@@ -1,6 +1,6 @@
-import type { Character, CharacterTraits } from "../data/Characters";
+import type { CharacterData, CharacterTraits } from "../data/Characters";
 import type { Resource } from "../data/Resources";
-import type { Activity } from "../data/Activities";
+import type { ActivityData } from "../data/Activities";
 
 export const sineWaveGenerator = (
   t: number,
@@ -128,9 +128,9 @@ export const traitsToWave = (
  *Generate reward based on resonance
  */
 export const calculateProgress = (
-  char: Character,
+  char: CharacterData,
   currentTraits: CharacterTraits,
-  activity: Activity,
+  activity: ActivityData,
   resonance: number,
 ) => {
   const baseReward = Math.min(
@@ -199,7 +199,10 @@ export const calculateResonance = (
 /**
  * Check interest bonus
  */
-export const hasInterestBonus = (char: Character, activity: Activity) => {
+export const hasInterestBonus = (
+  char: CharacterData,
+  activity: ActivityData,
+) => {
   return activity.interestBonus.some((interest: string) =>
     char.interests.includes(interest),
   );

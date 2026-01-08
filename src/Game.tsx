@@ -1,14 +1,30 @@
+import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
+import { useGameState } from "./GameState";
+
 import { CharacterTalents } from "./pages/CharacterTalents";
-import { GameStateProvider } from "./GameState";
 
 export const Game = () => {
-  console.log("game render");
+  const timeStep = 0.15;
+  const timeInterval = 100; // ms
+  const gameState = useGameState();
+
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      gameState.update(timeStep);
+    }, timeInterval);
+
+    return () => clearInterval(interval);
+  }, [gameState, isRunning]);
 
   return (
-    <GameStateProvider>
-      <Header />
+    <>
+      <Header isRunning={isRunning} setIsRunning={setIsRunning} />
       <CharacterTalents />;
-    </GameStateProvider>
+    </>
   );
 };

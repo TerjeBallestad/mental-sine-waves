@@ -1,7 +1,8 @@
+import { makeAutoObservable } from "mobx";
 import type { CharacterTraits } from "./Characters";
 import type { Resource, ResourceData } from "./Resources";
 
-export type Activity = {
+export type ActivityData = {
   name: string;
   color: string;
   requirements: CharacterTraits;
@@ -10,7 +11,33 @@ export type Activity = {
   reward: Partial<Record<Resource, ResourceData>>;
 };
 
-export const activities: Activity[] = [
+export class Activity {
+  name: string;
+  color: string;
+  requirements: CharacterTraits;
+  interestBonus: string[];
+  description?: string;
+  reward: Partial<Record<Resource, ResourceData>>;
+
+  constructor({
+    name,
+    color,
+    interestBonus,
+    requirements,
+    reward,
+    description,
+  }: ActivityData) {
+    makeAutoObservable(this);
+    this.name = name;
+    this.color = color;
+    this.requirements = requirements;
+    this.interestBonus = interestBonus;
+    this.description = description;
+    this.reward = reward;
+  }
+}
+
+export const activities: ActivityData[] = [
   {
     name: "Research & Documentation",
     description: "Detailed work requiring focus and organization",

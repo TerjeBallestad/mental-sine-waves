@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCharacter } from "../functions/useCharacter";
 
 import { activities } from "../data/Activities";
@@ -8,42 +8,24 @@ import {
 } from "../functions/FunctionLibrary";
 import { SvgWave, type WaveData } from "../components/Wave";
 import { ActivityView } from "../components/Activity";
+import { useGameState } from "../GameState";
 
 export const CharacterTalents = () => {
-  const timeStep = 0.15;
-  const timeInterval = 50; // ms
-  const selectedCharacter = 1;
   const selectedActivity = 1;
   const resolution = 400; // amount of points on the sine wave
   // const char = characters[selectedCharacter];
   const activity = activities[selectedActivity];
+  const { time, selectedCharacter: char } = useGameState();
+  const traits = char.traits;
+  console.log(time);
 
-  const [time, setTime] = useState(0);
-  const [isRunning] = useState(false);
   const [adaption, setAdaption] = useState(0);
-
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const interval = setInterval(() => {
-      setTime((t) => t + timeStep);
-    }, timeInterval);
-
-    return () => clearInterval(interval);
-  }, [isRunning]);
 
   const handleAdaptionIncrease = () => {
     setAdaption((prev) => prev + 1);
   };
 
-  const {
-    traits,
-    resource,
-    amount,
-    resonance,
-    resources,
-    character: char,
-  } = useCharacter(time, adaption, selectedCharacter);
+  const { resource, amount, resonance } = useCharacter(time, adaption, 1);
 
   const waves = Array<WaveData>(
     {
@@ -64,19 +46,6 @@ export const CharacterTalents = () => {
 
   return (
     <div className="page-grid gap-y-6">
-      <div className="breakout grid grid-cols-subgrid">
-        <div className="tooltip tooltip-bottom col-start-3 justify-self-end">
-          <div className="tooltip-content grid min-w-300 grid-cols-8">
-            {Object.entries(resources).map(([key, value]) => (
-              <div key={key}>
-                <p>{key}</p>
-                <p>{value}</p>
-              </div>
-            ))}
-          </div>
-          <button className="btn btn-primary">Resources</button>
-        </div>
-      </div>
       <div className="card card-border bg-base-100 shadow-lg">
         <div className="card-body">
           <h1 className="card-title">
@@ -101,7 +70,7 @@ export const CharacterTalents = () => {
           <h1 className="card-title">Activities</h1>
           <div className="grid grid-cols-4 gap-3">
             {activities.map((activity) => (
-              <ActivityView activity={activity} />
+              <ActivityView key={activity.name} activity={activity} />
             ))}
           </div>
         </div>

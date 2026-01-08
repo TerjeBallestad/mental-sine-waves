@@ -1,5 +1,5 @@
-import { useContext, useEffect, useReducer, useState } from "react";
-import { type CharacterTraits } from "../data/Characters";
+import { useEffect, useReducer, useState } from "react";
+import { elling, type CharacterTraits } from "../data/Characters";
 import { zeroResources } from "../data/Resources";
 import { activities } from "../data/Activities";
 import {
@@ -9,7 +9,6 @@ import {
   sumTraits,
 } from "./FunctionLibrary";
 import { resourceReducer } from "./ResourceReducer";
-import { CharacterContext } from "../GameStateContext";
 
 /**
  * Custom hook that calculates character traits and resource progression based on activity requirements and adaptation rating.
@@ -19,7 +18,8 @@ export const useCharacter = (
   adaptionRating: number,
   selectedActivity: number,
 ) => {
-  const character = useContext(CharacterContext);
+  const character = elling;
+
   const activity = activities[selectedActivity];
   const { traits: baseTraits } = character;
   const { requirements } = activity;
@@ -68,6 +68,7 @@ export const useCharacter = (
     resonance,
     resources,
     dispatchResources,
+
     character,
   };
 };

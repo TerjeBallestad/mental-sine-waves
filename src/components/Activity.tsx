@@ -1,9 +1,9 @@
 import { Pause, Play } from "lucide-react";
-import type { Activity } from "../data/Activities";
+import type { ActivityData } from "../data/Activities";
 import { useEffect, useState } from "react";
 
 type Props = {
-  activity: Activity;
+  activity: ActivityData;
 };
 
 export const ActivityView = ({ activity }: Props) => {
