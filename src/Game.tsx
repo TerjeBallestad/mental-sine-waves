@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import { useGameState } from "./GameState";
 
 import { CharacterTalents } from "./pages/CharacterTalents";
+import ResourceSystem from "./pages/ResourceSystem";
 
 export function Game() {
   const timeStep = 0.05; // hours (3 min)
@@ -25,6 +26,7 @@ export function Game() {
     <>
       <Header isRunning={isRunning} setIsRunning={setIsRunning} />
       <CharacterTalents />;
+      <ResourceSystem />
     </>
   );
 }

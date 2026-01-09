@@ -21,6 +21,9 @@ export function Header({ isRunning, setIsRunning }: HeaderProps) {
       </div>
       <div className="navbar-center">
         <span className="w-20">{gameState.time.toFixed(2)}</span>
+        <span className="w-20">{gameState.dateTime.day}</span>
+        <span className="w-20">{gameState.dateTime.time.toFixed(2)}</span>
+
         <button className="btn w-30" onClick={() => setIsRunning((r) => !r)}>
           {isRunning ? (
             <Pause className="size-4" />

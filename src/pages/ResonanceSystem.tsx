@@ -8,11 +8,7 @@ import {
   ArrowRight,
   CircleUser,
 } from "lucide-react";
-import {
-  characters,
-  emptyTraits,
-  type CharacterTraits,
-} from "../data/Characters";
+import { emptyTraits, type CharacterTraits } from "../data/Characters";
 import { activities } from "../data/Activities";
 import { SvgWave, WaveCard, type WaveData } from "../components/Wave";
 import { clsx } from "clsx";
@@ -28,11 +24,14 @@ import {
   sumTraits,
   traitsToWave,
 } from "../functions/FunctionLibrary";
+import { useGameState } from "../GameState";
 
 export const ResonanceSystem = () => {
-  const timeStep = 0.15;
-  const timeInterval = 250; // ms
+  const timeStep = 0.05;
+  const timeInterval = 50; // ms
   const resolution = 400; // amount of points on the sine wave
+
+  const gameState = useGameState();
 
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -53,7 +52,7 @@ export const ResonanceSystem = () => {
 
   console.log("Rendering App at time:", time);
 
-  const char = characters[selectedChar];
+  const char = gameState.characters[selectedChar];
   const activity = activities[selectedActivity];
 
   useEffect(() => {
@@ -100,7 +99,6 @@ export const ResonanceSystem = () => {
   useEffect(() => {
     const [resource, amount] = calculateProgress(
       char,
-      finalTraits,
       activity,
       currentResonance,
     );
@@ -238,7 +236,7 @@ export const ResonanceSystem = () => {
         <div className="card card-outline bg-base-100 shadow-lg">
           <div className="card-body">
             <h2 className="card-title">Character</h2>
-            {characters.map((c, idx) => (
+            {gameState.characters.map((c, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedChar(idx)}

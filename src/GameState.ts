@@ -13,6 +13,7 @@ export class AGameState {
   characters: Array<ACharacter>;
   selectedCharacter: ACharacter;
   globalResources = zeroResources;
+  dateTime = { day: 1, time: 0 };
 
   constructor() {
     makeAutoObservable(this, {
@@ -25,6 +26,10 @@ export class AGameState {
 
   update(deltaTime: number) {
     this.time += deltaTime;
+    this.dateTime = {
+      day: Math.floor(this.time / 24),
+      time: this.time % 24,
+    };
   }
 
   selectCharacter(char: ACharacter) {

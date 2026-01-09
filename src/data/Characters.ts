@@ -21,8 +21,30 @@ export type CharacterTraits = {
   neuroticism: number; //yes
 };
 
-export type CharacterCack = {
-  animation: number;
+export type CharacterState = {
+  energy: number;
+  mentalCapacity: number;
+  /* Attention
+
+   */
+  attention: number;
+  /* when the player chooses something, they spend these points
+    every interaction that isn't a habit costs will.
+  */
+  will: number;
+  security: number;
+  overskudd: number; // NOS
+  /* Amount of tasks the character can perform at the same time
+
+   */
+  workingMemory: number;
+  /* Depending on extraversion, high extraversion characters will deplete in low social situations
+    Characters with low extraversion will deplete in high social situations
+  */
+  socialBattery: number;
+  /* A multiplier for skill gains. Need to work on relevant skills to get proper skill gains
+   */
+  flow: number;
   /*
   To be effective, humans need a combination of cognitive, emotional, physical, and social resources. These interconnected resources help individuals manage stress, solve problems, maintain relationships, and achieve goals.
 Cognitive Resources
