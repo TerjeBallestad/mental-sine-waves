@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState } from "react";
 import { elling, type CharacterTraits } from "../data/Characters";
 import { zeroResources } from "../data/Resources";
-import { activities } from "../data/Activities";
+import { AllActivities } from "../data/Activities";
 import {
   calculateProgress,
   calculateResonance,
@@ -20,7 +20,7 @@ export const useCharacter = (
 ) => {
   const character = elling;
 
-  const activity = activities[selectedActivity];
+  const activity = AllActivities[selectedActivity];
   const { traits: baseTraits } = character;
   const { requirements } = activity;
   const [prevAdaptionRating, setPrevAdaptionRating] = useState(adaptionRating);

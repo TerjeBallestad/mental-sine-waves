@@ -5,6 +5,7 @@ import {
   calculateProgress,
   calculateResonance,
 } from "../functions/FunctionLibrary";
+import { ASkill, type SkillID } from "./Skills";
 
 export type CharacterTraits = {
   workingMemory: number; //yes
@@ -102,6 +103,7 @@ export class ACharacter {
   traits: CharacterTraits;
   currentActivity?: AActivity;
   adaptionRating = 10;
+  skills: Partial<Record<SkillID, ASkill>> = {};
 
   interests: string[];
 
@@ -137,6 +139,40 @@ export class ACharacter {
     const [resource, amount] = calculateProgress(this, activity, resonance);
 
     this.gameState.addResoure(resource, amount);
+  }
+
+  getSkill(skill: ASkill | SkillID): ASkill | undefined {
+    return typeof skill === "object"
+      ? this.getSkill(skill.id)
+      : this.getSkill(skill);
+  }
+
+  hasSkill(skill: ASkill | SkillID): boolean {
+    return !!this.getSkill(skill);
+  }
+
+  getSkillLevel(skill: ASkill | SkillID): number {
+    return this.getSkill(skill)?.level ?? 0;
+  }
+
+  canLearnSkill(skill: ASkill): boolean {
+    return skill.requirements.every(
+      (req) => this.getSkillLevel(skill) >= req.level,
+    );
+  }
+
+  grantSkill(skill: ASkill): boolean {
+    if (this.hasSkill(skill)) {
+      return true;
+    }
+
+    if (!this.canLearnSkill(skill)) {
+      return false;
+    }
+
+    const newSkill = skill.clone();
+    this.skills[newSkill.id] = newSkill;
+    return true;
   }
 }
 

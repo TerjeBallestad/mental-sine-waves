@@ -1,3 +1,4 @@
+import { makeAutoObservable } from "mobx";
 import type { CharacterTraits } from "./Characters";
 
 export type TalentEffectConfig = {
@@ -26,6 +27,7 @@ export class Talent {
     effectConfig: TalentEffectConfig,
     maxPoints = 5,
   ) {
+    makeAutoObservable(this);
     this.name = name;
     this.description = description;
     this.maxPoints = maxPoints;

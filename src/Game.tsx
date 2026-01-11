@@ -25,7 +25,7 @@ export function Game() {
   return (
     <>
       <Header isRunning={isRunning} setIsRunning={setIsRunning} />
-      <CharacterTalents />;
+      <CharacterTalents />
       <ResourceSystem />
     </>
   );

@@ -8,12 +8,14 @@ import {
 import { SvgWave, type WaveData } from "../components/Wave";
 import { useGameState } from "../GameState";
 import { emptyTraits } from "../data/Characters";
-import { Activities } from "../components/Activities";
+import { ActivityList } from "../components/ActivityList";
+import { SkillList } from "../components/SkillList";
 
 export function CharacterTalents() {
   const resolution = 400; // amount of points on the sine wave
 
-  const { time, selectedCharacter } = useGameState();
+  const { time, selectedCharacter, availableActivities, availableSkills } =
+    useGameState();
   const { traits, currentActivity } = selectedCharacter;
   const requirements = currentActivity?.requirements ?? emptyTraits;
 
@@ -61,12 +63,26 @@ export function CharacterTalents() {
           </button>
         </div>
       </div>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="card card-border bg-base-100 shadow-lg">
+          <div className="card-body">
+            <h2 className="card-title">Ressurser</h2>
+          </div>
+        </div>
 
-      <div className="card card-border bg-base-100">
-        <div className="card-body">
-          <h1 className="card-title">Activities</h1>
-          <div className="grid grid-cols-4 gap-3">
-            <Activities />
+        <div className="card card-border bg-base-100 col-span-2 row-span-2">
+          <div className="card-body">
+            <h1 className="card-title">Activities</h1>
+            <div className="grid grid-cols-4 gap-3">
+              <ActivityList activities={availableActivities} />
+            </div>
+          </div>
+        </div>
+
+        <div className="card card-border bg-base-100 shadow-lg">
+          <div className="card-body">
+            <h2 className="card-title">Ferdigheter</h2>
+            <SkillList skills={availableSkills} />
           </div>
         </div>
       </div>

@@ -7,11 +7,16 @@ import {
   testDummy,
 } from "./data/Characters";
 import { zeroResources, type Resource } from "./data/Resources";
+import { AllSkills } from "./data/Skills";
+import { AllActivities } from "./data/Activities";
 
 export class AGameState {
   time = 0;
   characters: Array<ACharacter>;
   selectedCharacter: ACharacter;
+
+  availableSkills = AllSkills;
+  availableActivities = AllActivities;
   globalResources = zeroResources;
   dateTime = { day: 1, time: 0 };
 

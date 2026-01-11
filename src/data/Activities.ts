@@ -20,6 +20,7 @@ export class AActivity {
   description?: string;
   reward: Partial<Record<Resource, ResourceData>>;
   rewardInterval = 0.05; // 3 minutes
+  mastery = 0; // determines mental adaption
 
   get intervalTime() {
     if (typeof this.timeToComplete === "number") {
@@ -178,7 +179,7 @@ export const dummy = new AActivity("Dummy task", {
   description: "A task with no requirements",
 });
 
-export const activities = Array<AActivity>(
+export const AllActivities = Array<AActivity>(
   research,
   community,
   creative,

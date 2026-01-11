@@ -9,7 +9,7 @@ import {
   CircleUser,
 } from "lucide-react";
 import { emptyTraits, type CharacterTraits } from "../data/Characters";
-import { activities } from "../data/Activities";
+import { AllActivities } from "../data/Activities";
 import { SvgWave, WaveCard, type WaveData } from "../components/Wave";
 import { clsx } from "clsx";
 import {
@@ -53,7 +53,7 @@ export const ResonanceSystem = () => {
   console.log("Rendering App at time:", time);
 
   const char = gameState.characters[selectedChar];
-  const activity = activities[selectedActivity];
+  const activity = AllActivities[selectedActivity];
 
   useEffect(() => {
     if (!isRunning) return;
@@ -266,7 +266,7 @@ export const ResonanceSystem = () => {
         <div className="card card-outline bg-base-100 shadow-lg">
           <div className="card-body">
             <h2 className="card-title">Activity</h2>
-            {activities.map((a, idx) => (
+            {AllActivities.map((a, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedActivity(idx)}
