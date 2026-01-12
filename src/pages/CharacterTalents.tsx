@@ -78,12 +78,11 @@ export function CharacterTalents() {
             </div>
           </div>
         </div>
-
-        <div className="card card-border bg-base-100 shadow-lg">
-          <div className="card-body">
-            <h2 className="card-title">Ferdigheter</h2>
-            <SkillList skills={availableSkills} />
-          </div>
+      </div>
+      <div className="card card-border bg-base-100 shadow-lg">
+        <div className="card-body grid grid-cols-4">
+          <h2 className="card-title">Ferdigheter</h2>
+          <SkillList skills={availableSkills} />
         </div>
       </div>
 

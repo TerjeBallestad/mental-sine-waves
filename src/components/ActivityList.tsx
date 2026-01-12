@@ -1,5 +1,5 @@
 import { AActivity } from "../data/Activities";
-import { ActivityView } from "./Activity";
+import { ActivityView } from "./ActivityView";
 
 type Props = {
   activities: Array<AActivity>;

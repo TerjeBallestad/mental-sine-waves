@@ -143,8 +143,8 @@ export class ACharacter {
 
   getSkill(skill: ASkill | SkillID): ASkill | undefined {
     return typeof skill === "object"
-      ? this.getSkill(skill.id)
-      : this.getSkill(skill);
+      ? this.skills[skill.id]
+      : this.skills[skill];
   }
 
   hasSkill(skill: ASkill | SkillID): boolean {
@@ -156,6 +156,8 @@ export class ACharacter {
   }
 
   canLearnSkill(skill: ASkill): boolean {
+    console.log("can learn skill", skill.id);
+
     return skill.requirements.every(
       (req) => this.getSkillLevel(skill) >= req.level,
     );

@@ -1,6 +1,6 @@
 import { entries } from "mobx";
 import type { ASkill, SkillID } from "../data/Skills";
-import { SkillView } from "./Skill";
+import { SkillView } from "./SkillView";
 
 type Props = {
   skills: Record<SkillID, ASkill>;
