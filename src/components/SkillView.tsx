@@ -11,7 +11,6 @@ export const SkillView = observer(function SkillView({ skill }: Props) {
   const gameState = useGameState();
   const character = gameState.selectedCharacter;
   const characterSkill = character.getSkill(skill);
-  console.log(character.canLearnSkill(skill));
 
   if (!characterSkill) {
     return (
@@ -32,6 +31,14 @@ export const SkillView = observer(function SkillView({ skill }: Props) {
         >
           Learn
         </button>
+        <div>
+          {skill.requirements.map((req) => (
+            <div className="flex">
+              <p>{req.skill}</p>
+              <p>{req.level}</p>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

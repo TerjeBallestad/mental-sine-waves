@@ -10,11 +10,11 @@ export class ASkill {
   requirements: Array<SkillRequirement>;
 
   constructor(
-    id: string,
+    id: SkillID,
     { category, tier, name, description, requirements }: Omit<SkillData, "id">,
   ) {
     makeAutoObservable(this);
-    this.id = id as SkillID;
+    this.id = id;
     this.name = name;
     this.category = category;
     this.tier = tier;
@@ -381,7 +381,7 @@ export const AllSkills = {
   engineering: new ASkill("engineering", {
     category: "technical",
     name: "Engineering",
-    tier: 4,
+    tier: 3,
     requirements: [
       { skill: "systemAnalysis", level: 7 },
       { skill: "mathematics", level: 7 },
@@ -390,7 +390,7 @@ export const AllSkills = {
   }),
 } satisfies Record<SkillID, ASkill>;
 
-type SkillCategory =
+export type SkillCategory =
   | "basic"
   | "analytical"
   | "creative"
@@ -435,7 +435,7 @@ type SkillRequirement = { skill: SkillID; level: number };
 
 type SkillData = {
   name: string;
-  id: string;
+  id: SkillID;
   category: SkillCategory;
   tier: SkillTier;
   description: string;

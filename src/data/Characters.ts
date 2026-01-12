@@ -1,4 +1,4 @@
-import { action, makeAutoObservable } from "mobx";
+import { action, makeAutoObservable, set } from "mobx";
 import { getGameState } from "../GameState";
 import type { AActivity } from "./Activities";
 import {
@@ -6,6 +6,7 @@ import {
   calculateResonance,
 } from "../functions/FunctionLibrary";
 import { ASkill, type SkillID } from "./Skills";
+import type { Resource } from "./Resources";
 
 export type CharacterTraits = {
   workingMemory: number; //yes
@@ -108,6 +109,12 @@ export class ACharacter {
   interests: string[];
 
   description?: string;
+  recentRewards = Array<{
+    resource: Resource;
+    amount: number;
+    resonance: number;
+    time: number;
+  }>();
 
   private get gameState() {
     return getGameState();
@@ -139,6 +146,15 @@ export class ACharacter {
     const [resource, amount] = calculateProgress(this, activity, resonance);
 
     this.gameState.addResoure(resource, amount);
+    this.recentRewards.push({ resource, amount, resonance, time: Date.now() });
+    set(this.recentRewards, this.recentRewards.length - 1, {
+      resource,
+      amount,
+      resonance,
+      time: Date.now(),
+    });
+    this.recentRewards.splice(50);
+    // console.log(this.recentRewards);
   }
 
   getSkill(skill: ASkill | SkillID): ASkill | undefined {
@@ -156,10 +172,8 @@ export class ACharacter {
   }
 
   canLearnSkill(skill: ASkill): boolean {
-    console.log("can learn skill", skill.id);
-
     return skill.requirements.every(
-      (req) => this.getSkillLevel(skill) >= req.level,
+      (req) => this.getSkillLevel(req.skill) >= req.level,
     );
   }
 

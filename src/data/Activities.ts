@@ -69,7 +69,7 @@ export const research = new AActivity("Research & Documentation", {
   interestBonus: ["writing", "observation"],
   reward: {
     Insight: { amount: 1, influence: 1, chance: 0.2 },
-    AnalyticalExperience: { amount: 10, influence: 0.2, chance: 0.5 },
+    analyticalExperience: { amount: 10, influence: 0.2, chance: 0.5 },
     Research: { amount: 13, influence: 1, chance: 1 },
   },
 });
@@ -90,7 +90,7 @@ export const community = new AActivity("Community Outreach", {
     neuroticism: 40,
   },
   reward: {
-    SocialExperience: { amount: 80, influence: 0.5, chance: 1 },
+    socialExperience: { amount: 80, influence: 0.5, chance: 1 },
     Connection: { amount: 40, influence: 0.6, chance: 0.9 },
     Reputation: { amount: 30, influence: 0.8, chance: 0.8 },
     Trust: { amount: 25, influence: 0.4, chance: 0.7 },
@@ -120,7 +120,7 @@ export const creative = new AActivity("Creative Problem-Solving", {
     Ideas: { amount: 20, influence: 0.9, chance: 1 },
     Innovation: { amount: 12, influence: 0.9, chance: 0.8 },
     Insight: { amount: 6, influence: 1, chance: 0.6 },
-    AnalyticalExperience: { amount: 3, influence: 1, chance: 1 },
+    analyticalExperience: { amount: 3, influence: 1, chance: 1 },
     Research: { amount: 4, influence: 1, chance: 0.5 },
     Knowledge: { amount: 2, influence: 1, chance: 0.7 },
   },
@@ -172,7 +172,7 @@ export const dummy = new AActivity("Dummy task", {
   },
   reward: {
     Money: { amount: 5, influence: 0.01, chance: 1 },
-    SocialExperience: { amount: 1, influence: 0.01, chance: 0.2 },
+    socialExperience: { amount: 1, influence: 0.01, chance: 0.2 },
     Beauty: { amount: 2, influence: 1, chance: 0.5 },
   },
   interestBonus: [],

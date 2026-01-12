@@ -9,7 +9,6 @@ import {
   CircleUser,
 } from "lucide-react";
 import { emptyTraits, type CharacterTraits } from "../data/Characters";
-import { AllActivities } from "../data/Activities";
 import { SvgWave, WaveCard, type WaveData } from "../components/Wave";
 import { clsx } from "clsx";
 import {
@@ -32,6 +31,7 @@ export const ResonanceSystem = () => {
   const resolution = 400; // amount of points on the sine wave
 
   const gameState = useGameState();
+  const activities = gameState.availableActivities;
 
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -53,7 +53,7 @@ export const ResonanceSystem = () => {
   console.log("Rendering App at time:", time);
 
   const char = gameState.characters[selectedChar];
-  const activity = AllActivities[selectedActivity];
+  const activity = activities[selectedActivity];
 
   useEffect(() => {
     if (!isRunning) return;
@@ -266,7 +266,7 @@ export const ResonanceSystem = () => {
         <div className="card card-outline bg-base-100 shadow-lg">
           <div className="card-body">
             <h2 className="card-title">Activity</h2>
-            {AllActivities.map((a, idx) => (
+            {activities.map((a, idx) => (
               <button
                 key={idx}
                 onClick={() => setSelectedActivity(idx)}

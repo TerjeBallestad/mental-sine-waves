@@ -1,8 +1,8 @@
+import type { SkillCategory } from "./Skills";
+
 export type Resource =
   | "none"
-  | "SocialExperience"
-  | "TechnicalExperience"
-  | "AnalyticalExperience"
+  | `${SkillCategory}Experience`
   | "Ideas"
   | "Information"
   | "Innovation"
@@ -48,9 +48,13 @@ export type ResourceData = {
 
 export const zeroResources: Record<Resource, number> = {
   none: 0,
-  SocialExperience: 0,
-  TechnicalExperience: 0,
-  AnalyticalExperience: 0,
+  analyticalExperience: 0,
+  technicalExperience: 0,
+  basicExperience: 0,
+  creativeExperience: 0,
+  organizationalExperience: 0,
+  physicalExperience: 0,
+  socialExperience: 0,
   Ideas: 0,
   Information: 0,
   Innovation: 0,
