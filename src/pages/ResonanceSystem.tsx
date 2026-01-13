@@ -12,7 +12,7 @@ import { emptyTraits, type CharacterTraits } from "../data/Characters";
 import { SvgWave, WaveCard, type WaveData } from "../components/Wave";
 import { clsx } from "clsx";
 import {
-  calculateProgress,
+  calculateReward,
   calculateResonance,
   generateVisualWaveData,
   hasInterestBonus,
@@ -97,7 +97,7 @@ export const ResonanceSystem = () => {
   );
 
   useEffect(() => {
-    const [resource, amount] = calculateProgress(
+    const [resource, amount] = calculateReward(
       char,
       activity,
       currentResonance,

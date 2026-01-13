@@ -399,6 +399,16 @@ export type SkillCategory =
   | "physical"
   | "technical";
 
+export const SkillCategoryNames: Record<SkillCategory, string> = {
+  basic: "Grunnleggende",
+  analytical: "Analytisk",
+  creative: "Kreativ",
+  organizational: "Organisatorisk",
+  physical: "Fysisk",
+  social: "Sosial",
+  technical: "Teknisk",
+};
+
 /**
  * what cognitive tier is the skill?
  * **Tier 0: Sensorimotor Skills (Birth-2 years equivalent)**

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useCharacter } from "../functions/useCharacter";
 
 import {
   generateVisualWaveData,
@@ -25,8 +24,6 @@ export function CharacterTalents() {
   const handleAdaptionIncrease = () => {
     setAdaption((prev) => prev + 1);
   };
-
-  const { resource, amount, resonance } = useCharacter(time, adaption, 1);
 
   const waves = Array<WaveData>({
     points: generateVisualWaveData(traitsToWave, time, traits, resolution),
@@ -56,9 +53,6 @@ export function CharacterTalents() {
           <div className="font-mono">
             {JSON.stringify(traits).replaceAll(/['"]/g, " ")}
           </div>
-          <p>{JSON.stringify(resource)}</p>
-          <p>{JSON.stringify(amount)}</p>
-          <p>{JSON.stringify(resonance)}</p>
 
           <div>{adaption}</div>
           <button className="btn" onClick={handleAdaptionIncrease}>

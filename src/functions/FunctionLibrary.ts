@@ -131,7 +131,7 @@ export const traitsToWave = (
 /**
  *Generate reward based on resonance
  */
-export const calculateProgress = (
+export const calculateReward = (
   char: ACharacter,
   activity: AActivity,
   resonance: number,

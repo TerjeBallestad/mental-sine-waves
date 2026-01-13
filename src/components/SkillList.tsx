@@ -1,8 +1,15 @@
 import { entries } from "mobx";
-import type { ASkill, SkillID } from "../data/Skills";
+import {
+  SkillCategoryNames,
+  type ASkill,
+  type SkillCategory,
+  type SkillID,
+} from "../data/Skills";
 import { SkillView } from "./SkillView";
 import { useGameState } from "../GameState";
 import { type Resource } from "../data/Resources";
+import { useState } from "react";
+import clsx from "clsx";
 
 type Props = {
   skills: Record<SkillID, ASkill>;
@@ -10,6 +17,8 @@ type Props = {
 
 export function SkillList({ skills }: Props) {
   const gameState = useGameState();
+  const [selectedTab, setTabSelected] = useState<SkillCategory>("basic");
+
   const experience = Array<Resource>(
     "socialExperience",
     "basicExperience",
@@ -22,19 +31,37 @@ export function SkillList({ skills }: Props) {
 
   return (
     <>
-      {experience.map((resource) => (
-        <label className="col-span-2">
-          {resource}: {gameState.globalResources[resource]}
-          <progress
-            className="progress"
-            value={gameState.globalResources[resource]}
-            max={1000}
-          />
-        </label>
-      ))}
-      {entries(skills).map(([id, skill]) => (
-        <SkillView key={id} skill={skill} />
-      ))}
+      <div role="tablist" className="tabs col-span-4 justify-center">
+        {Object.entries(SkillCategoryNames).map(([cat, name]) => (
+          <a
+            role="tab"
+            key={cat}
+            className={clsx("tab", { "tab-active": selectedTab === cat })}
+            onClick={() => setTabSelected(cat as SkillCategory)}
+          >
+            {name}
+          </a>
+        ))}
+      </div>
+      {experience
+        .filter((resource) => resource.startsWith(selectedTab))
+        .map((resource) => (
+          <label key={resource} className="col-span-4">
+            <div className="pb-2 capitalize">
+              {resource}: {gameState.globalResources[resource]}
+            </div>
+            <progress
+              className="progress progress-secondary mb-4"
+              value={gameState.globalResources[resource]}
+              max={1000}
+            />
+          </label>
+        ))}
+      {entries(skills)
+        .filter(([, skill]) => skill.category === selectedTab)
+        .map(([id, skill]) => (
+          <SkillView key={id} skill={skill} />
+        ))}
     </>
   );
 }

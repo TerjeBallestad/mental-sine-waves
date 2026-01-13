@@ -2,7 +2,7 @@ import { action, makeAutoObservable, set } from "mobx";
 import { getGameState } from "../GameState";
 import type { AActivity } from "./Activities";
 import {
-  calculateProgress,
+  calculateReward,
   calculateResonance,
 } from "../functions/FunctionLibrary";
 import { ASkill, type SkillID } from "./Skills";
@@ -134,16 +134,15 @@ export class ACharacter {
     this.description = description;
   }
 
-  doActivity(activity: AActivity, progress: number) {
+  doActivity(activity: AActivity) {
     this.currentActivity = activity;
-    console.log(activity, progress);
 
     const resonance = calculateResonance(
       this.gameState.time,
       this.traits,
       activity.requirements,
     );
-    const [resource, amount] = calculateProgress(this, activity, resonance);
+    const [resource, amount] = calculateReward(this, activity, resonance);
 
     this.gameState.addResoure(resource, amount);
     this.recentRewards.push({ resource, amount, resonance, time: Date.now() });
@@ -151,7 +150,7 @@ export class ACharacter {
       resource,
       amount,
       resonance,
-      time: Date.now(),
+      time: this.gameState.time,
     });
     this.recentRewards.splice(50);
     // console.log(this.recentRewards);

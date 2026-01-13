@@ -11,30 +11,30 @@ export function ActivityView({ activity }: Props) {
   const intervalMS = 100;
   const progressStep = 4;
   const steps = 100 / progressStep;
-  // const activityIntervals = activity.timeToComplete / intervals
+  // const activityIntervals = activity.timeToComplete / intervals;
   const activityStep = activity.timeToComplete / steps;
 
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  console.log("activity render");
   const gameState = useGameState();
   if (isRunning) {
     gameState.update(activityStep);
-    gameState.selectedCharacter.doActivity(activity, progress);
+    console.log("Progress", progress, activityStep);
+    gameState.selectedCharacter.doActivity(activity);
   }
 
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => {
       setProgress((p) => {
-        const value = p + progressStep;
-        if (value > 100) {
+        const progress = p + progressStep;
+        if (progress > 100) {
           clearInterval(interval);
           setIsRunning(false);
           return 0;
         }
-        return value;
+        return progress;
       });
     }, intervalMS);
     return () => clearInterval(interval);
