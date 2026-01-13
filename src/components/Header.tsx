@@ -10,7 +10,6 @@ type HeaderProps = {
 
 export function Header({ isRunning, setIsRunning }: HeaderProps) {
   const gameState = useGameState();
-  console.log(gameState.globalResources, "📖");
 
   return (
     <div className="navbar bg-base-200">

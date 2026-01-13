@@ -21,6 +21,7 @@ export class AActivity {
   reward: Partial<Record<Resource, ResourceData>>;
   rewardInterval = 0.05; // 3 minutes
   mastery = 0; // determines mental adaption
+  previousIntervalTime = 0;
 
   get intervalTime() {
     if (typeof this.timeToComplete === "number") {
@@ -73,6 +74,7 @@ export const research = new AActivity("Research & Documentation", {
     Research: { amount: 13, influence: 1, chance: 1 },
   },
 });
+
 export const community = new AActivity("Community Outreach", {
   color: "#ec4899",
   requirements: {
@@ -90,11 +92,11 @@ export const community = new AActivity("Community Outreach", {
     neuroticism: 40,
   },
   reward: {
-    socialExperience: { amount: 80, influence: 0.5, chance: 1 },
-    Connection: { amount: 40, influence: 0.6, chance: 0.9 },
-    Reputation: { amount: 30, influence: 0.8, chance: 0.8 },
-    Trust: { amount: 25, influence: 0.4, chance: 0.7 },
-    Popularity: { amount: 20, influence: 0.2, chance: 0.6 },
+    socialExperience: { amount: 10, influence: 1, chance: 1 },
+    Connection: { amount: 4, influence: 1, chance: 0.9 },
+    Reputation: { amount: 3, influence: 1, chance: 0.8 },
+    Trust: { amount: 2, influence: 1, chance: 0.7 },
+    Popularity: { amount: 2, influence: 0.9, chance: 0.6 },
   },
   interestBonus: ["helping", "social-dynamics"],
   description: "High energy, varied interactions",

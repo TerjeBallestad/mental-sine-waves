@@ -19,6 +19,7 @@ export class AGameState {
   availableActivities = AllActivities;
   globalResources = zeroResources;
   dateTime = { day: 1, time: 0 };
+  private previousTime = Date.now();
 
   constructor() {
     makeAutoObservable(this, {
@@ -30,6 +31,11 @@ export class AGameState {
   }
 
   update(deltaTime: number) {
+    if (this.previousTime === Date.now()) {
+      // prevent multiple updates in the same frame
+      return;
+    }
+    this.previousTime = Date.now();
     this.time += deltaTime;
     this.dateTime = {
       day: Math.floor(this.time / 24),

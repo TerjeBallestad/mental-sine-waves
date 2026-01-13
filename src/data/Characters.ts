@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, set } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 import { getGameState } from "../GameState";
 import type { AActivity } from "./Activities";
 import {
@@ -135,7 +135,14 @@ export class ACharacter {
   }
 
   doActivity(activity: AActivity) {
+    if (
+      this.gameState.time - activity.previousIntervalTime <
+      activity.rewardInterval
+    ) {
+      return;
+    }
     this.currentActivity = activity;
+    activity.previousIntervalTime = this.gameState.time;
 
     const resonance = calculateResonance(
       this.gameState.time,
@@ -145,14 +152,14 @@ export class ACharacter {
     const [resource, amount] = calculateReward(this, activity, resonance);
 
     this.gameState.addResoure(resource, amount);
-    this.recentRewards.push({ resource, amount, resonance, time: Date.now() });
-    set(this.recentRewards, this.recentRewards.length - 1, {
+    this.recentRewards.unshift({
       resource,
       amount,
       resonance,
-      time: this.gameState.time,
+      time: Date.now(),
     });
-    this.recentRewards.splice(50);
+
+    this.recentRewards.splice(48);
     // console.log(this.recentRewards);
   }
 

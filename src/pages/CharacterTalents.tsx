@@ -9,7 +9,7 @@ import { useGameState } from "../GameState";
 import { emptyTraits } from "../data/Characters";
 import { ActivityList } from "../components/ActivityList";
 import { SkillList } from "../components/SkillList";
-import clsx from "clsx";
+import { RewardList } from "../components/RewardList";
 
 export function CharacterTalents() {
   const resolution = 400; // amount of points on the sine wave
@@ -43,8 +43,6 @@ export function CharacterTalents() {
     });
   }
 
-  console.log(selectedCharacter.recentRewards);
-
   return (
     <div className="page-grid gap-y-6">
       <div className="card card-border bg-base-100 shadow-lg">
@@ -62,29 +60,8 @@ export function CharacterTalents() {
       </div>
 
       {/* Recent reward display */}
-      <div className="card bg-base-100 shadow-lg">
-        <div className="card-body grid grid-cols-8">
-          {selectedCharacter.recentRewards.map((reward, idx) => (
-            <div
-              key={`${idx}-${reward.time}`}
-              className={clsx(
-                "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm",
-                {
-                  "bg-success": reward.resonance > 0.65,
-                  "bg-warning":
-                    reward.resonance > 0.45 && reward.resonance <= 0.65,
-                  "bg-error": reward.resonance <= 0.45,
-                },
-              )}
-              style={{
-                opacity: 1 - idx * 0.02,
-              }}
-            >
-              <div>{reward.resource}</div>
-              <div>{Math.round(reward.amount)}</div>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-8 gap-2">
+        <RewardList recentRewards={selectedCharacter.recentRewards} />
       </div>
 
       {/* Wave Visualization */}

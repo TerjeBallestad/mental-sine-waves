@@ -33,7 +33,7 @@ export const SkillView = observer(function SkillView({ skill }: Props) {
         </button>
         <div>
           {skill.requirements.map((req) => (
-            <div className="flex">
+            <div className="flex" key={`${skill.id}-${req.skill}`}>
               <p>{req.skill}</p>
               <p>{req.level}</p>
             </div>
