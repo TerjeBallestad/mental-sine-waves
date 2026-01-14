@@ -10,6 +10,7 @@ import { emptyTraits } from "../data/Characters";
 import { ActivityList } from "../components/ActivityList";
 import { SkillList } from "../components/SkillList";
 import { RewardList } from "../components/RewardList";
+import { CharacterStateList } from "../components/CharacterStateList";
 
 export function CharacterTalents() {
   const resolution = 400; // amount of points on the sine wave
@@ -60,7 +61,7 @@ export function CharacterTalents() {
       </div>
 
       {/* Recent reward display */}
-      <div className="grid grid-cols-8 gap-2">
+      <div className="breakout grid grid-cols-8 gap-2">
         <RewardList recentRewards={selectedCharacter.recentRewards} />
       </div>
 
@@ -73,14 +74,15 @@ export function CharacterTalents() {
           <SvgWave waves={waves} />
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-6">
+      <div className="breakout grid grid-cols-3 gap-6">
         <div className="card card-border bg-base-100 shadow-lg">
           <div className="card-body">
             <h2 className="card-title">Ressurser</h2>
+            <CharacterStateList state={selectedCharacter.state} />
           </div>
         </div>
 
-        <div className="card card-border bg-base-100 col-span-2 row-span-2">
+        <div className="card card-border bg-base-100 col-span-2">
           <div className="card-body">
             <h1 className="card-title">Aktiviteter</h1>
             <div className="grid grid-cols-4 gap-3">

@@ -98,6 +98,18 @@ export const emptyTraits: CharacterTraits = {
   neuroticism: 0,
 };
 
+export const startingCharacterState: CharacterState = {
+  attention: 30,
+  energy: 80,
+  flow: 10,
+  mentalCapacity: 80,
+  overskudd: 20,
+  security: 40,
+  socialBattery: 70,
+  will: 40,
+  workingMemory: 66,
+};
+
 export class ACharacter {
   name: string;
   color: string;
@@ -105,6 +117,7 @@ export class ACharacter {
   currentActivity?: AActivity;
   adaptionRating = 10;
   skills: Partial<Record<SkillID, ASkill>> = {};
+  state = startingCharacterState;
 
   interests: string[];
 

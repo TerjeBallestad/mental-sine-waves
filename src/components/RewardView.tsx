@@ -13,7 +13,7 @@ export function RewardView({ resource, resonance, amount, idx }: Props) {
   return (
     <div
       className={clsx(
-        "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm",
+        "text-base-100 rounded-lg px-3 py-2 text-sm font-bold shadow-sm transition-all",
         {
           "bg-success": resonance > 0.65,
           "bg-warning": resonance > 0.45 && resonance <= 0.65,
