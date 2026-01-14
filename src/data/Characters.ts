@@ -47,6 +47,8 @@ export type CharacterState = {
   /* A multiplier for skill gains. Need to work on relevant skills to get proper skill gains
    */
   flow: number;
+  nutrition: number;
+  purpose: number;
   /*
   To be effective, humans need a combination of cognitive, emotional, physical, and social resources. These interconnected resources help individuals manage stress, solve problems, maintain relationships, and achieve goals.
 Cognitive Resources
@@ -108,6 +110,8 @@ export const startingCharacterState: CharacterState = {
   socialBattery: 70,
   will: 40,
   workingMemory: 66,
+  nutrition: 50,
+  purpose: 10,
 };
 
 export class ACharacter {
