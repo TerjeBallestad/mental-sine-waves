@@ -4,6 +4,7 @@ import { useGameState } from "./GameState";
 import { CharacterTalents } from "./pages/CharacterTalents";
 import PatientResourcePrototype from "./pages/ResourceTrinity";
 import { ResourceSystem } from "./pages/ResourceSystem";
+import OverskuddMathPrototype from "./pages/OverskuddSystemet";
 
 export function Game() {
   const timeStep = 0.05; // hours (3 min)
@@ -28,6 +29,7 @@ export function Game() {
       <CharacterTalents />
       <ResourceSystem />
       <PatientResourcePrototype />
+      <OverskuddMathPrototype />
     </>
   );
 }

@@ -6,7 +6,7 @@ import { SvgWave, type WaveData } from "../components/Wave";
 import { useGameState } from "../GameState";
 import { emptyTraits } from "../data/Characters";
 import { SkillList } from "../components/SkillList";
-import { TraitList } from "../components/TraitList";
+import { TraitList } from "../components/TraitView";
 import { ActivityList } from "../components/ActivityView";
 import { CharacterStateList } from "../components/CharacterStateView";
 import { RewardList } from "../components/RewardView";

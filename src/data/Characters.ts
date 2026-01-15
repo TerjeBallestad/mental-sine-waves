@@ -137,6 +137,11 @@ export class ACharacter {
     return getGameState();
   }
 
+  get overskudd() {
+    const values = Object.values(this.state);
+    return values.reduce((p, sum) => sum + p, 0) / values.length;
+  }
+
   constructor(
     name: string,
     { color, interests, traits, description }: Omit<CharacterData, "name">,
