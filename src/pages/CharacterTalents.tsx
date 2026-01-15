@@ -55,6 +55,18 @@ export function CharacterTalents() {
           <SvgWave waves={waves} />
         </div>
       </div>
+
+      <div className="card bg-base-100 shadow-lg">
+        <div className="card-body">
+          <h2 className="card-title mb-4">Overskudd</h2>
+          <progress
+            className="progress"
+            value={selectedCharacter.state.overskudd}
+            max={100}
+          />
+        </div>
+      </div>
+
       <div className="breakout grid grid-cols-3 gap-6">
         <div className="card card-border bg-base-100 shadow-lg">
           <div className="card-body">
