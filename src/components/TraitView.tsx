@@ -23,7 +23,6 @@ type TraitViewProps = {
 function TraitView({ name, value }: TraitViewProps) {
   return (
     <li className="bg-base-100 flex flex-col items-center gap-2 rounded p-2 shadow-lg">
-      {/* For TSX uncomment the commented types below */}
       <div
         className="radial-progress text-accent"
         style={{ "--value": value } as React.CSSProperties}
