@@ -3,11 +3,21 @@ import type { AActivity } from "../data/Activities";
 import { useEffect, useState } from "react";
 import { useGameState } from "../GameState";
 
-type Props = {
+type ActivityListProps = {
+  activities: AActivity[];
+};
+
+type ActivityViewProps = {
   activity: AActivity;
 };
 
-export function ActivityView({ activity }: Props) {
+export function ActivityList({ activities }: ActivityListProps) {
+  return activities.map((activity) => (
+    <ActivityView key={activity.name} activity={activity} />
+  ));
+}
+
+function ActivityView({ activity }: ActivityViewProps) {
   const intervalMS = 100;
   const progressStep = 4;
   const steps = 100 / progressStep;

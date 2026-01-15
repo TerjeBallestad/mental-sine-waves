@@ -45,7 +45,7 @@ export function PatientResourcePrototype() {
   const [time, setTime] = useState(0);
   const [log, setLog] =
     useState(Array<{ message: string; type: string; time: number }>());
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
 
   const activities = [
     {

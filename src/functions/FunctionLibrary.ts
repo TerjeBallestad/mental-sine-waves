@@ -127,6 +127,9 @@ export const traitsToWave = (
 
   return value / totalHarmonics;
 };
+export const keyToName = (name: string) => {
+  return name.replace(/([A-Z])/g, " $1").trim();
+};
 
 /**
  *Generate reward based on resonance

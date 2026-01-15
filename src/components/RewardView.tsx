@@ -9,6 +9,28 @@ type Props = {
   idx: number;
 };
 
+type RewardListProps = {
+  recentRewards: Array<{
+    resource: Resource;
+    amount: number;
+    resonance: number;
+    time: number;
+  }>;
+};
+
+export function RewardList({ recentRewards }: RewardListProps) {
+  return recentRewards.map((reward, idx) => (
+    <RewardView
+      key={reward.time}
+      resource={reward.resource}
+      amount={reward.amount}
+      idx={idx}
+      resonance={reward.resonance}
+      time={reward.time}
+    />
+  ));
+}
+
 export function RewardView({ resource, resonance, amount, idx }: Props) {
   return (
     <div

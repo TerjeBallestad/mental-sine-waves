@@ -25,7 +25,7 @@ import {
 } from "../functions/FunctionLibrary";
 import { useGameState } from "../GameState";
 
-export const ResonanceSystem = () => {
+export function ResonanceSystem() {
   const timeStep = 0.05;
   const timeInterval = 50; // ms
   const resolution = 400; // amount of points on the sine wave
@@ -633,4 +633,4 @@ export const ResonanceSystem = () => {
       </div>
     </div>
   );
-};
+}

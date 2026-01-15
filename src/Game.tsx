@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { useGameState } from "./GameState";
-
 import { CharacterTalents } from "./pages/CharacterTalents";
-import ResourceSystem from "./pages/ResourceSystem";
 import PatientResourcePrototype from "./pages/ResourceTrinity";
+import { ResourceSystem } from "./pages/ResourceSystem";
 
 export function Game() {
   const timeStep = 0.05; // hours (3 min)

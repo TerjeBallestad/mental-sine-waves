@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import {
   generateVisualWaveData,
   traitsToWave,
@@ -7,10 +5,11 @@ import {
 import { SvgWave, type WaveData } from "../components/Wave";
 import { useGameState } from "../GameState";
 import { emptyTraits } from "../data/Characters";
-import { ActivityList } from "../components/ActivityList";
 import { SkillList } from "../components/SkillList";
-import { RewardList } from "../components/RewardList";
-import { CharacterStateList } from "../components/CharacterStateList";
+import { TraitList } from "../components/TraitList";
+import { ActivityList } from "../components/ActivityView";
+import { CharacterStateList } from "../components/CharacterStateView";
+import { RewardList } from "../components/RewardView";
 
 export function CharacterTalents() {
   const resolution = 400; // amount of points on the sine wave
@@ -19,12 +18,6 @@ export function CharacterTalents() {
     useGameState();
   const { traits, currentActivity } = selectedCharacter;
   const requirements = currentActivity?.requirements ?? emptyTraits;
-
-  const [adaption, setAdaption] = useState(0);
-
-  const handleAdaptionIncrease = () => {
-    setAdaption((prev) => prev + 1);
-  };
 
   const waves = Array<WaveData>({
     points: generateVisualWaveData(traitsToWave, time, traits, resolution),
@@ -46,19 +39,7 @@ export function CharacterTalents() {
 
   return (
     <div className="page-grid gap-y-6">
-      <div className="card card-border bg-base-100 shadow-lg">
-        <div className="card-body">
-          <h1 className="card-title">{selectedCharacter.name}</h1>
-          <div className="font-mono">
-            {JSON.stringify(traits).replaceAll(/['"]/g, " ")}
-          </div>
-
-          <div>{adaption}</div>
-          <button className="btn" onClick={handleAdaptionIncrease}>
-            +
-          </button>
-        </div>
-      </div>
+      <TraitList traits={traits} />
 
       {/* Recent reward display */}
       <div className="breakout grid grid-cols-8 gap-2">

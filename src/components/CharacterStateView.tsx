@@ -1,16 +1,32 @@
 import clsx from "clsx";
+import { keyToName } from "../functions/FunctionLibrary";
+import type { CharacterState } from "../data/Characters";
+import { entries } from "mobx";
 
-type Props = {
+type StateViewProps = {
   name: string;
   value: number;
 };
-export function CharacterStateView({ name, value }: Props) {
+
+type StateListProps = {
+  state: CharacterState;
+};
+
+export function CharacterStateList({ state }: StateListProps) {
+  return (
+    <ul className="list">
+      {entries(state).map(([key, value]) => (
+        <CharacterStateView key={key} name={key} value={value} />
+      ))}
+    </ul>
+  );
+}
+
+export function CharacterStateView({ name, value }: StateViewProps) {
   return (
     <li className="list-row flex flex-col">
       <div className="flex justify-between">
-        <span className="capitalize">
-          {name.replace(/([A-Z])/g, " $1").trim()}
-        </span>
+        <span className="capitalize">{keyToName(name)}</span>
         <span className="font-semibold">{Math.round(value)}</span>
       </div>
 

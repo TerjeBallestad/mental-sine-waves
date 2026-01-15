@@ -140,7 +140,7 @@ const activities: GameActivity[] = [
   },
 ];
 
-const ResourceSystem = () => {
+export function ResourceSystem() {
   const [resources, setResources] = useState<Resources>(initialResources);
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [log, setLog] = useState<string[]>([
@@ -515,6 +515,4 @@ const ResourceSystem = () => {
       </div>
     </div>
   );
-};
-
-export default ResourceSystem;
+}
