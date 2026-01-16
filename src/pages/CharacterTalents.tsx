@@ -17,7 +17,7 @@ export function CharacterTalents() {
   const { time, selectedCharacter, availableActivities, availableSkills } =
     useGameState();
   const { traits, currentActivity } = selectedCharacter;
-  const requirements = currentActivity?.requirements ?? emptyTraits;
+  const requirements = currentActivity?.mentalSignature ?? emptyTraits;
 
   const waves = Array<WaveData>({
     points: generateVisualWaveData(traitsToWave, time, traits, resolution),
@@ -33,7 +33,8 @@ export function CharacterTalents() {
         resolution,
       ),
       dashed: true,
-      ...currentActivity,
+      name: currentActivity.label,
+      color: currentActivity.color,
     });
   }
 
@@ -60,10 +61,13 @@ export function CharacterTalents() {
         <div className="card-body">
           <h2 className="card-title mb-4">Overskudd</h2>
           <progress
-            className="progress"
+            className="progress progress-secondary h-5"
             value={selectedCharacter.state.overskudd}
             max={100}
           />
+          <div className="self-end font-semibold">
+            {selectedCharacter.state.overskudd}/100
+          </div>
         </div>
       </div>
 

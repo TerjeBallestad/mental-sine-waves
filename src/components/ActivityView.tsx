@@ -13,7 +13,7 @@ type ActivityViewProps = {
 
 export function ActivityList({ activities }: ActivityListProps) {
   return activities.map((activity) => (
-    <ActivityView key={activity.name} activity={activity} />
+    <ActivityView key={activity.label} activity={activity} />
   ));
 }
 
@@ -52,7 +52,7 @@ function ActivityView({ activity }: ActivityViewProps) {
 
   return (
     <div>
-      <p>{activity.name}</p>
+      <p>{activity.label}</p>
       <progress
         className="progress progress-primary"
         value={progress}

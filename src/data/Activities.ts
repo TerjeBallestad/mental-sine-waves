@@ -1,24 +1,33 @@
 import { makeAutoObservable } from "mobx";
 import type { CharacterTraits } from "./Characters";
 import type { Resource, ResourceData } from "./Resources";
+import type { SkillRequirement } from "./Skills";
 
 export type ActivityData = {
-  name: string;
+  id: string;
+  label: string;
   color: string;
-  requirements: CharacterTraits;
+  mentalSignature: CharacterTraits;
   interestBonus: string[];
   description?: string;
+  baseDifficulty: number; // 1-10
   reward: Partial<Record<Resource, ResourceData>>;
+  requiredSkills: SkillRequirement[];
+  recomendedSkills: SkillRequirement[];
 };
 
-export class AActivity {
-  name: string;
+export class AActivity implements ActivityData {
+  id: string;
+  label: string;
   color: string;
   timeToComplete = 1; // hour
-  requirements: CharacterTraits;
+  mentalSignature: CharacterTraits;
   interestBonus: string[];
   description?: string;
   reward: Partial<Record<Resource, ResourceData>>;
+  baseDifficulty: number;
+  requiredSkills: SkillRequirement[];
+  recomendedSkills: SkillRequirement[];
   rewardInterval = 0.05; // 3 minutes
   mastery = 0; // determines mental adaption
   previousIntervalTime = 0;
@@ -30,30 +39,49 @@ export class AActivity {
     return 1;
   }
 
+  /**
+   * Calculates
+   */
+  getDifficulty(): number {
+    let difficulty = this.baseDifficulty;
+    difficulty *= 0.2;
+    return difficulty;
+  }
+
   constructor(
-    name: string,
+    id: string,
     {
+      label,
       color,
       interestBonus,
-      requirements,
+      mentalSignature,
       reward,
       description,
-    }: Omit<ActivityData, "name">,
+      recomendedSkills,
+      requiredSkills,
+      baseDifficulty,
+    }: Omit<ActivityData, "id">,
   ) {
     makeAutoObservable(this);
-    this.name = name;
+    this.id = id;
+    this.label = label;
     this.color = color;
-    this.requirements = requirements;
+    this.mentalSignature = mentalSignature;
     this.interestBonus = interestBonus;
     this.description = description;
     this.reward = reward;
+    this.requiredSkills = recomendedSkills;
+    this.recomendedSkills = requiredSkills;
+    this.baseDifficulty = baseDifficulty;
   }
 }
 
 export const research = new AActivity("Research & Documentation", {
+  label: "Research & Documentation",
   description: "Detailed work requiring focus and organization",
   color: "#f59e0b",
-  requirements: {
+  baseDifficulty: 6,
+  mentalSignature: {
     fortitude: 45, // Requires moderate sustained effort
     focus: 70, // High focus needed
     creativity: 40, // Some creativity helps
@@ -73,11 +101,15 @@ export const research = new AActivity("Research & Documentation", {
     analyticalExperience: { amount: 10, influence: 0.2, chance: 0.5 },
     Research: { amount: 13, influence: 1, chance: 1 },
   },
+  requiredSkills: [],
+  recomendedSkills: [],
 });
 
 export const community = new AActivity("Community Outreach", {
+  label: "Community Outreach",
   color: "#ec4899",
-  requirements: {
+  baseDifficulty: 5,
+  mentalSignature: {
     fortitude: 65, // Draining, high energy output
     focus: 40, // Less about precision
     creativity: 70, // Need to adapt to people
@@ -100,11 +132,15 @@ export const community = new AActivity("Community Outreach", {
   },
   interestBonus: ["helping", "social-dynamics"],
   description: "High energy, varied interactions",
+  requiredSkills: [{ skill: "communication", level: 3 }],
+  recomendedSkills: [],
 });
 
 export const creative = new AActivity("Creative Problem-Solving", {
+  label: "Creative Problem-Solving",
   color: "#14b8a6",
-  requirements: {
+  baseDifficulty: 4,
+  mentalSignature: {
     fortitude: 55, // Intense bursts
     focus: 50, // Need to execute ideas
     creativity: 85, // High creativity required
@@ -128,11 +164,15 @@ export const creative = new AActivity("Creative Problem-Solving", {
   },
   interestBonus: ["self-discovery", "observation"],
   description: "Bursts of insight, unpredictable flow",
+  requiredSkills: [],
+  recomendedSkills: [],
 });
 
 export const minfulness = new AActivity("Mindfulness Meditation", {
+  label: "Mindfulness Meditation",
   color: "#22c55e",
-  requirements: {
+  baseDifficulty: 2,
+  mentalSignature: {
     fortitude: 30, // Low sustained effort
     focus: 20, // Minimal focus needed
     creativity: 10, // Low creativity required
@@ -154,11 +194,15 @@ export const minfulness = new AActivity("Mindfulness Meditation", {
   },
   interestBonus: ["self-discovery", "solitude"],
   description: "Quiet reflection, internal focus",
+  requiredSkills: [],
+  recomendedSkills: [],
 });
 
 export const dummy = new AActivity("Dummy task", {
+  label: "Dummy task",
   color: "#9ca3af",
-  requirements: {
+  baseDifficulty: 0,
+  mentalSignature: {
     attentionSpan: 50,
     processingSpeed: 20,
     workingMemory: 10,
@@ -179,6 +223,8 @@ export const dummy = new AActivity("Dummy task", {
   },
   interestBonus: [],
   description: "A task with no requirements",
+  requiredSkills: [],
+  recomendedSkills: [],
 });
 
 export const AllActivities = Array<AActivity>(

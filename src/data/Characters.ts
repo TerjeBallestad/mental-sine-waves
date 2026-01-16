@@ -9,25 +9,25 @@ import { ASkill, type SkillID } from "./Skills";
 import type { Resource } from "./Resources";
 
 export type CharacterTraits = {
-  workingMemory: number; //yes
-  intellect: number; //yes
   agreeableness: number; //no
-  attentionSpan: number; //yes
-  processingSpeed: number; //yes
-  fortitude: number; //yes
-  creativity: number; //yes
-  focus: number; //yes
-  openness: number; //yes
   conscientiousness: number; //yes
   extraversion: number; //yes
   neuroticism: number; //yes
+  openness: number; //yes
+
+  attentionSpan: number; //yes
+  creativity: number; //yes
+  focus: number; //yes
+  fortitude: number; //yes
+  intellect: number; //yes
+  processingSpeed: number; //yes
+  workingMemory: number; //yes
 };
 
 export type CharacterState = {
   energy: number;
   mentalCapacity: number;
   /* Attention
-
    */
   attention: number;
   /* when the player chooses something, they spend these points
@@ -35,20 +35,25 @@ export type CharacterState = {
   */
   will: number;
   security: number;
-  overskudd: number; // NOS
+  overskudd: number;
   /* Amount of tasks the character can perform at the same time
-
    */
   workingMemory: number;
   /* Depending on extraversion, high extraversion characters will deplete in low social situations
-    Characters with low extraversion will deplete in high social situations
-  */
+   * Characters with low extraversion will deplete in high social situations
+   * Different from social need. You can have all your social needs met but have your social battery drained
+   */
   socialBattery: number;
   /* A multiplier for skill gains. Need to work on relevant skills to get proper skill gains
    */
   flow: number;
+  /*  Different from hunger, this is a meassure of how healthy the food that has been eaten
+   */
   nutrition: number;
   purpose: number;
+  /* Indicator for all fundamental needs (bladder, social, energy, fun, hunger)
+   */
+  mood: number;
   /*
   To be effective, humans need a combination of cognitive, emotional, physical, and social resources. These interconnected resources help individuals manage stress, solve problems, maintain relationships, and achieve goals.
 Cognitive Resources
@@ -86,18 +91,18 @@ export type CharacterData = {
 };
 
 export const emptyTraits: CharacterTraits = {
+  agreeableness: 0,
   attentionSpan: 0,
+  conscientiousness: 0,
+  creativity: 0,
+  extraversion: 0,
+  focus: 0,
+  fortitude: 0,
+  intellect: 0,
+  neuroticism: 0,
+  openness: 0,
   processingSpeed: 0,
   workingMemory: 0,
-  fortitude: 0,
-  creativity: 0,
-  focus: 0,
-  intellect: 0,
-  openness: 0,
-  conscientiousness: 0,
-  extraversion: 0,
-  agreeableness: 0,
-  neuroticism: 0,
 };
 
 export const startingCharacterState: CharacterState = {
@@ -105,13 +110,14 @@ export const startingCharacterState: CharacterState = {
   energy: 80,
   flow: 10,
   mentalCapacity: 80,
+  mood: 50,
+  nutrition: 50,
   overskudd: 20,
+  purpose: 10,
   security: 40,
   socialBattery: 70,
   will: 40,
   workingMemory: 66,
-  nutrition: 50,
-  purpose: 10,
 };
 
 export class ACharacter {
@@ -122,7 +128,8 @@ export class ACharacter {
   adaptionRating = 10;
   skills: Partial<Record<SkillID, ASkill>> = {};
   state = startingCharacterState;
-
+  overskudd = 30;
+  baseOverskuddRegen = 2.0;
   interests: string[];
 
   description?: string;
@@ -137,9 +144,21 @@ export class ACharacter {
     return getGameState();
   }
 
-  get overskudd() {
-    const values = Object.values(this.state);
-    return values.reduce((p, sum) => sum + p, 0) / values.length;
+  /**
+   * Overskudd per hour
+   */
+  get overskuddRegen() {
+    let regen = this.baseOverskuddRegen;
+    const { nutrition, mood } = this.state;
+    // Nutrition modifier: -50% to +50% regen
+    const nutritionModifier = ((nutrition - 50) / 50) * 0.5;
+    regen *= 1 + nutritionModifier;
+
+    // Mood modifier: -30% to +30% regen
+    const moodMotifier = ((mood - 50) / 50) * 0.3;
+    regen *= 1 + moodMotifier;
+
+    return Math.max(0.1, regen); // Minimum 0.1/hour
   }
 
   constructor(
@@ -169,7 +188,7 @@ export class ACharacter {
     const resonance = calculateResonance(
       this.gameState.time,
       this.traits,
-      activity.requirements,
+      activity.mentalSignature,
     );
     const [resource, amount] = calculateReward(this, activity, resonance);
 

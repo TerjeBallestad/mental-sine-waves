@@ -138,12 +138,13 @@ export const calculateReward = (
   char: ACharacter,
   activity: AActivity,
   resonance: number,
-) => {
+): [Resource, number] => {
   const { traits } = char;
   const baseReward = Math.min(
     1,
-    activity.requirements.intellect > traits.intellect
-      ? resonance - (activity.requirements.intellect - traits.intellect) / 100
+    activity.mentalSignature.intellect > traits.intellect
+      ? resonance -
+          (activity.mentalSignature.intellect - traits.intellect) / 100
       : resonance,
   );
   const interestBonus = hasInterestBonus(char, activity) ? 0.2 : 0;
@@ -168,7 +169,7 @@ export const calculateReward = (
       (finalReward?.amount ?? 0) *
         (1 - (1 - finalProgress) * (finalReward?.influence ?? 0)),
     ),
-  ] as [Resource, number];
+  ];
 };
 
 /**
@@ -201,6 +202,18 @@ export const calculateResonance = (
 
   return Math.max(0, Math.min(1, highestResonance));
 };
+
+// export function calculateSuitability(
+//   character: ACharacter,
+//   activity: AActivity,
+// ) {
+//   attribute_score = Σ(Math.min(character_value / optimal_value, 1.0)) / count;
+//   skill_score = Σ(min(character_skill / optimal_skill, 1.0)) / count;
+//   trait_score = 1.0 - Σ(abs(character_trait - preferred_trait)) / count;
+//   interest_score =
+//     (strong_matches * 1.0 + weak_matches * 0.5 - poor_matches * 0.3) /
+//     total_interests;
+// }
 
 /**
  * Check interest bonus

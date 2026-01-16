@@ -399,7 +399,7 @@ export type SkillCategory =
   | "physical"
   | "technical";
 
-export const SkillCategoryNames: Record<SkillCategory, string> = {
+export const SkillCategoryLabels: Record<SkillCategory, string> = {
   basic: "Grunnleggende",
   analytical: "Analytisk",
   creative: "Kreativ",
@@ -441,7 +441,7 @@ export const SkillCategoryNames: Record<SkillCategory, string> = {
  * - Required: Tier 3 foundation skills at level 7+
  */
 type SkillTier = 1 | 2 | 3 | 4;
-type SkillRequirement = { skill: SkillID; level: number };
+export type SkillRequirement = { skill: SkillID; level: number };
 
 type SkillData = {
   name: string;
@@ -449,7 +449,7 @@ type SkillData = {
   category: SkillCategory;
   tier: SkillTier;
   description: string;
-  requirements: Array<SkillRequirement>;
+  requirements: SkillRequirement[];
 };
 
 export type SkillID =

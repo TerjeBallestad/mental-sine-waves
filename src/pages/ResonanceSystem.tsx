@@ -70,7 +70,7 @@ export function ResonanceSystem() {
   }, [char]);
 
   useEffect(() => {
-    const goal = subtractTraits(activity.requirements, currentTraits);
+    const goal = subtractTraits(activity.mentalSignature, currentTraits);
     setAdaption((prev) =>
       Object.keys(prev).reduce((output, key) => {
         const typedKey = key as keyof CharacterTraits;
@@ -93,7 +93,7 @@ export function ResonanceSystem() {
   const currentResonance = calculateResonance(
     time,
     finalTraits,
-    activity.requirements,
+    activity.mentalSignature,
   );
 
   useEffect(() => {
@@ -130,11 +130,12 @@ export function ResonanceSystem() {
       points: generateVisualWaveData(
         traitsToWave,
         time,
-        activity.requirements,
+        activity.mentalSignature,
         resolution,
       ),
       dashed: true,
-      ...activity,
+      name: activity.label,
+      color: activity.color,
     },
   );
 
@@ -275,7 +276,7 @@ export function ResonanceSystem() {
                   borderColor: selectedActivity === idx ? a.color : undefined,
                 }}
               >
-                <div className="font-semibold">{a.name}</div>
+                <div className="font-semibold">{a.label}</div>
                 <div className="mt-1 text-xs">{a.description}</div>
               </button>
             ))}

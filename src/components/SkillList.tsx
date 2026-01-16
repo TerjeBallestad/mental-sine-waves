@@ -1,6 +1,6 @@
 import { entries } from "mobx";
 import {
-  SkillCategoryNames,
+  SkillCategoryLabels,
   type ASkill,
   type SkillCategory,
   type SkillID,
@@ -32,14 +32,14 @@ export function SkillList({ skills }: Props) {
   return (
     <>
       <div role="tablist" className="tabs col-span-4 justify-center">
-        {Object.entries(SkillCategoryNames).map(([cat, name]) => (
+        {Object.entries(SkillCategoryLabels).map(([cat, label]) => (
           <a
             role="tab"
             key={cat}
             className={clsx("tab", { "tab-active": selectedTab === cat })}
             onClick={() => setTabSelected(cat as SkillCategory)}
           >
-            {name}
+            {label}
           </a>
         ))}
       </div>
