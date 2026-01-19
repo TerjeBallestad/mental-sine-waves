@@ -320,3 +320,26 @@ export const nora = new ACharacter("Nora", {
   interests: ["self-discovery", "social-dynamics", "independence"],
   description: "Dynamic, adaptable, thrives on variety",
 });
+
+// Everyday situations with absurd results
+export const situations = [
+  {
+    task: "Deciding what to wear",
+    elling_outcome: "Spent 45 minutes, wore same thing as yesterday",
+    humor: "gentle-absurdism",
+  },
+  {
+    task: "Small talk with neighbor",
+    elling_outcome: "Hid behind car until they left",
+    humor: "relatable-awkward",
+  },
+  {
+    task: "Cooking dinner",
+    kjell_bjarne_outcome: "Made enough pasta for 12 people",
+    humor: "well-meaning-disaster",
+  },
+];
+
+// Show don't tell - these are GAME EVENTS not cutscenes
+// Player sees Elling literally hiding behind the car sprite
+// It's funny because it's visual and ridiculous
