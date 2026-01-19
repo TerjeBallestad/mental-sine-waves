@@ -1,6 +1,6 @@
 import { action, makeAutoObservable } from "mobx";
 import { getGameState } from "../GameState";
-import type { AActivity, ActivityCosts } from "./Activities";
+import type { AActivity } from "./Activities";
 import {
   calculateReward,
   calculateResonance,
@@ -147,20 +147,68 @@ export class ACharacter {
   }
 
   /**
-   * Overskudd per hour
+   * Overskudd per hour - regeneration based on all mental states
+   * Slower base rate, can go negative
    */
   get overskuddRegen() {
-    let regen = this.baseOverskuddRegen;
-    const { nutrition, mood } = this.state;
-    // Nutrition modifier: -50% to +50% regen
-    const nutritionModifier = ((nutrition - 50) / 50) * 0.5;
+    // Reduced base regen rate (slower than before)
+    let regen = this.baseOverskuddRegen * 0.5; // 50% of original base rate
+
+    const {
+      energy,
+      will,
+      attention,
+      mentalCapacity,
+      socialBattery,
+      mood,
+      nutrition,
+      security,
+      purpose,
+      flow,
+    } = this.state;
+
+    // Energy modifier: -30% to +30% regen
+    const energyModifier = ((energy - 50) / 50) * 0.3;
+    regen *= 1 + energyModifier;
+
+    // Will modifier: -20% to +20% regen
+    const willModifier = ((will - 50) / 50) * 0.2;
+    regen *= 1 + willModifier;
+
+    // Attention modifier: -25% to +25% regen
+    const attentionModifier = ((attention - 50) / 50) * 0.25;
+    regen *= 1 + attentionModifier;
+
+    // Mental Capacity modifier: -20% to +20% regen
+    const mentalCapacityModifier = ((mentalCapacity - 50) / 50) * 0.2;
+    regen *= 1 + mentalCapacityModifier;
+
+    // Social Battery modifier: -15% to +15% regen
+    const socialBatteryModifier = ((socialBattery - 50) / 50) * 0.15;
+    regen *= 1 + socialBatteryModifier;
+
+    // Nutrition modifier: -30% to +30% regen
+    const nutritionModifier = ((nutrition - 50) / 50) * 0.3;
     regen *= 1 + nutritionModifier;
 
-    // Mood modifier: -30% to +30% regen
-    const moodMotifier = ((mood - 50) / 50) * 0.3;
-    regen *= 1 + moodMotifier;
+    // Mood modifier: -25% to +25% regen
+    const moodModifier = ((mood - 50) / 50) * 0.25;
+    regen *= 1 + moodModifier;
 
-    return Math.max(0.1, regen); // Minimum 0.1/hour
+    // Security modifier: -20% to +20% regen
+    const securityModifier = ((security - 50) / 50) * 0.2;
+    regen *= 1 + securityModifier;
+
+    // Purpose modifier: -15% to +15% regen
+    const purposeModifier = ((purpose - 50) / 50) * 0.15;
+    regen *= 1 + purposeModifier;
+
+    // Flow modifier: +0% to +30% regen (bonus only)
+    const flowModifier = flow / 100 * 0.3;
+    regen *= 1 + flowModifier;
+
+    // Allow negative regen (no minimum floor)
+    return regen;
   }
 
   /**
@@ -169,8 +217,9 @@ export class ACharacter {
    */
   updateState(deltaTimeHours: number) {
     // Overskudd regeneration (already calculated)
+    // Allow negative values - no cap
     const overskuddRegen = this.overskuddRegen * deltaTimeHours;
-    this.state.overskudd = Math.min(100, this.state.overskudd + overskuddRegen);
+    this.state.overskudd = this.state.overskudd + overskuddRegen;
 
     // Energy regeneration based on nutrition and rest
     const energyRegenBase = 5; // per hour
@@ -287,43 +336,86 @@ export class ACharacter {
   }
 
   /**
-   * Check if character can afford the activity costs
+   * Check if character would refuse to do this activity based on hidden stat thresholds
    */
-  canAffordActivity(activity: AActivity): { can: boolean; reason?: string } {
+  willCharacterRefuseActivity(activity: AActivity): { willRefuse: boolean; reason?: string } {
     const costs = activity.getEffectiveCosts(this);
 
-    // Check each cost
-    if (costs.energy && this.state.energy < costs.energy) {
-      return { can: false, reason: `Not enough energy (need ${costs.energy})` };
+    // Check will-power threshold - character needs at least 1.5x the required will
+    if (costs.will && costs.will > 0) {
+      const requiredWill = costs.will * 1.5;
+      if (this.state.will < requiredWill) {
+        return {
+          willRefuse: true,
+          reason: `${this.name} doesn't have enough willpower for this task`,
+        };
+      }
     }
-    if (costs.will && this.state.will < costs.will) {
-      return { can: false, reason: `Not enough will (need ${costs.will})` };
+
+    // Check energy threshold for physically demanding activities (energy cost > 15)
+    if (costs.energy && costs.energy > 15) {
+      const requiredEnergy = costs.energy * 1.3;
+      if (this.state.energy < requiredEnergy) {
+        return {
+          willRefuse: true,
+          reason: `${this.name} is too tired for this physically demanding task`,
+        };
+      }
     }
-    if (costs.attention && this.state.attention < costs.attention) {
+
+    // Check attention threshold for cognitive activities (attention cost > 15)
+    if (costs.attention && costs.attention > 15) {
+      const requiredAttention = costs.attention * 1.3;
+      if (this.state.attention < requiredAttention) {
+        return {
+          willRefuse: true,
+          reason: `${this.name} can't focus enough for this cognitive task`,
+        };
+      }
+    }
+
+    // Check mentalCapacity threshold for complex activities (mentalCapacity cost > 15)
+    if (costs.mentalCapacity && costs.mentalCapacity > 15) {
+      const requiredMentalCapacity = costs.mentalCapacity * 1.3;
+      if (this.state.mentalCapacity < requiredMentalCapacity) {
+        return {
+          willRefuse: true,
+          reason: `${this.name} doesn't have enough mental capacity for this complex task`,
+        };
+      }
+    }
+
+    // Check socialBattery threshold for social activities (socialBattery cost > 15)
+    if (costs.socialBattery && costs.socialBattery > 15) {
+      const requiredSocialBattery = costs.socialBattery * 1.3;
+      if (this.state.socialBattery < requiredSocialBattery) {
+        return {
+          willRefuse: true,
+          reason: `${this.name} doesn't have enough social energy for this task`,
+        };
+      }
+    }
+
+    return { willRefuse: false };
+  }
+
+  /**
+   * Check if character can afford the activity costs
+   * Now checks Overskudd threshold and refusal system
+   */
+  canAffordActivity(activity: AActivity): { can: boolean; reason?: string } {
+    // Check if character would refuse
+    const refusalCheck = this.willCharacterRefuseActivity(activity);
+    if (refusalCheck.willRefuse) {
+      return { can: false, reason: refusalCheck.reason };
+    }
+
+    // Check Overskudd threshold (need at least 10 overskudd to start)
+    const minOverskuddThreshold = 10;
+    if (this.state.overskudd < minOverskuddThreshold) {
       return {
         can: false,
-        reason: `Not enough attention (need ${costs.attention})`,
-      };
-    }
-    if (costs.overskudd && this.state.overskudd < costs.overskudd) {
-      return {
-        can: false,
-        reason: `Not enough overskudd (need ${costs.overskudd})`,
-      };
-    }
-    if (
-      costs.mentalCapacity &&
-      this.state.mentalCapacity < costs.mentalCapacity
-    ) {
-      return {
-        can: false,
-        reason: `Not enough mental capacity (need ${costs.mentalCapacity})`,
-      };
-    }
-    if (costs.socialBattery && this.state.socialBattery < costs.socialBattery) {
-      return {
-        can: false,
-        reason: `Not enough social battery (need ${costs.socialBattery})`,
+        reason: `Not enough overskudd (need at least ${minOverskuddThreshold})`,
       };
     }
 
@@ -331,33 +423,22 @@ export class ACharacter {
   }
 
   /**
-   * Consume activity costs
+   * Apply continuous Overskudd drain during activity
+   * Returns true if activity should continue, false if it should stop (overskudd went negative)
    */
-  private consumeActivityCosts(costs: ActivityCosts) {
-    if (costs.energy) {
-      this.state.energy = Math.max(0, this.state.energy - costs.energy);
+  applyActivityDrain(activity: AActivity, deltaTimeHours: number): boolean {
+    const drainRate = activity.getOverskuddDrainRate(this);
+    const drainAmount = drainRate * deltaTimeHours;
+
+    this.state.overskudd -= drainAmount;
+
+    // Stop activity if Overskudd goes negative
+    if (this.state.overskudd < 0) {
+      this.currentActivity = undefined;
+      return false;
     }
-    if (costs.will) {
-      this.state.will = Math.max(0, this.state.will - costs.will);
-    }
-    if (costs.attention) {
-      this.state.attention = Math.max(0, this.state.attention - costs.attention);
-    }
-    if (costs.overskudd) {
-      this.state.overskudd = Math.max(0, this.state.overskudd - costs.overskudd);
-    }
-    if (costs.mentalCapacity) {
-      this.state.mentalCapacity = Math.max(
-        0,
-        this.state.mentalCapacity - costs.mentalCapacity,
-      );
-    }
-    if (costs.socialBattery) {
-      this.state.socialBattery = Math.max(
-        0,
-        this.state.socialBattery - costs.socialBattery,
-      );
-    }
+
+    return true;
   }
 
   /**
@@ -439,17 +520,31 @@ export class ACharacter {
       return;
     }
 
-    // Check if can afford
-    const affordCheck = this.canAffordActivity(activity);
-    if (!affordCheck.can) {
-      return; // Silently fail if can't afford
+    // Set current activity if not already set
+    if (!this.currentActivity) {
+      // Check if can afford
+      const affordCheck = this.canAffordActivity(activity);
+      if (!affordCheck.can) {
+        return; // Silently fail if can't afford
+      }
+      this.currentActivity = activity;
     }
 
-    // Consume costs
-    const costs = activity.getEffectiveCosts(this);
-    this.consumeActivityCosts(costs);
+    // Verify we're still doing this activity
+    if (this.currentActivity !== activity) {
+      return;
+    }
 
-    this.currentActivity = activity;
+    // Apply continuous Overskudd drain
+    const deltaTime = activity.rewardInterval;
+    const shouldContinue = this.applyActivityDrain(activity, deltaTime);
+
+    // If Overskudd went negative, stop the activity
+    if (!shouldContinue) {
+      activity.previousIntervalTime = this.gameState.time;
+      return;
+    }
+
     activity.previousIntervalTime = this.gameState.time;
 
     const resonance = calculateResonance(

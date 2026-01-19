@@ -136,6 +136,29 @@ export class AActivity implements ActivityData {
   }
 
   /**
+   * Calculates the Overskudd drain rate per hour for this activity.
+   * Converts all costs to a single Overskudd drain rate.
+   */
+  getOverskuddDrainRate(character: ACharacter): number {
+    const costs = this.getEffectiveCosts(character);
+
+    // Convert all costs to Overskudd drain rate per hour
+    // Weights: energy 0.3, will 0.4, attention 0.3, mentalCapacity 0.2, socialBattery 0.2, overskudd 1.0
+    const weightedSum =
+      (costs.energy ?? 0) * 0.3 +
+      (costs.will ?? 0) * 0.4 +
+      (costs.attention ?? 0) * 0.3 +
+      (costs.mentalCapacity ?? 0) * 0.2 +
+      (costs.socialBattery ?? 0) * 0.2 +
+      (costs.overskudd ?? 0) * 1.0;
+
+    // Convert to hourly drain rate (divide by activity duration)
+    const drainPerHour = weightedSum / this.timeToComplete;
+
+    return Math.max(0, drainPerHour);
+  }
+
+  /**
    * Gets the mastery level based on mastery points (deprecated - use character.getActivityMasteryLevel)
    */
   getMasteryLevel(): number {

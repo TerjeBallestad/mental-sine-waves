@@ -62,11 +62,14 @@ export function CharacterTalents() {
           <h2 className="card-title mb-4">Overskudd</h2>
           <progress
             className="progress progress-secondary h-5"
-            value={selectedCharacter.state.overskudd}
+            value={Math.max(0, Math.min(100, selectedCharacter.state.overskudd))}
             max={100}
           />
           <div className="self-end font-semibold">
-            {selectedCharacter.state.overskudd}/100
+            {selectedCharacter.state.overskudd.toFixed(1)}
+            {selectedCharacter.state.overskudd < 0 && (
+              <span className="text-error ml-2">(Negative!)</span>
+            )}
           </div>
         </div>
       </div>

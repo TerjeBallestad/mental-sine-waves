@@ -3,7 +3,6 @@ import type { AActivity } from "../data/Activities";
 import { useEffect, useState } from "react";
 import { useGameState } from "../GameState";
 import { observer } from "mobx-react-observer";
-import { keyToName } from "../functions/FunctionLibrary";
 
 type ActivityListProps = {
   activities: AActivity[];
@@ -33,7 +32,8 @@ const ActivityView = observer(function ActivityView({
   const gameState = useGameState();
   const character = gameState.selectedCharacter;
   const affordCheck = character.canAffordActivity(activity);
-  const costs = activity.getEffectiveCosts(character);
+  const refusalCheck = character.willCharacterRefuseActivity(activity);
+  const overskuddDrainRate = activity.getOverskuddDrainRate(character);
   const masteryLevel = character.getActivityMasteryLevel(activity);
   const masteryPoints = character.getActivityMastery(activity);
 
@@ -44,6 +44,14 @@ const ActivityView = observer(function ActivityView({
       if (progress !== 0) {
         gameState.update(activityStep);
         character.doActivity(activity);
+
+        // Check if activity stopped (Overskudd went negative)
+        if (!character.currentActivity || character.currentActivity !== activity) {
+          setIsRunning(false);
+          setProgress(0);
+          clearInterval(interval);
+          return;
+        }
       }
 
       setProgress((p) => {
@@ -51,6 +59,10 @@ const ActivityView = observer(function ActivityView({
         if (progress > 100) {
           clearInterval(interval);
           setIsRunning(false);
+          // Clear current activity when done
+          if (character.currentActivity === activity) {
+            character.currentActivity = undefined;
+          }
           return 0;
         }
         return progress;
@@ -81,26 +93,14 @@ const ActivityView = observer(function ActivityView({
           </div>
         )}
 
-        {/* Costs Display */}
-        {Object.keys(costs).length > 0 && (
+        {/* Overskudd Drain Rate Display */}
+        {overskuddDrainRate > 0 && (
           <div className="mt-2 space-y-1">
-            <div className="text-xs font-semibold text-error">Costs:</div>
+            <div className="text-xs font-semibold text-error">Overskudd Drain:</div>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(costs).map(([key, value]) => {
-                const stateValue =
-                  character.state[key as keyof typeof character.state];
-                const canAfford = stateValue >= (value ?? 0);
-                return (
-                  <div
-                    key={key}
-                    className={`badge badge-sm ${
-                      canAfford ? "badge-outline" : "badge-error"
-                    }`}
-                  >
-                    {keyToName(key)}: -{value}
-                  </div>
-                );
-              })}
+              <div className="badge badge-sm badge-error">
+                -{overskuddDrainRate.toFixed(1)}/hour
+              </div>
             </div>
           </div>
         )}
@@ -134,8 +134,16 @@ const ActivityView = observer(function ActivityView({
           )}
         </button>
 
+        {/* Refusal Warning */}
+        {refusalCheck.willRefuse && (
+          <div className="alert alert-error alert-sm mt-2">
+            <AlertCircle className="size-4" />
+            <span className="text-xs">{refusalCheck.reason}</span>
+          </div>
+        )}
+
         {/* Affordability Warning */}
-        {!affordCheck.can && (
+        {!affordCheck.can && !refusalCheck.willRefuse && (
           <div className="alert alert-warning alert-sm mt-2">
             <AlertCircle className="size-4" />
             <span className="text-xs">{affordCheck.reason}</span>

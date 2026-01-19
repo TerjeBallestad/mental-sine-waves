@@ -1,7 +1,6 @@
 import clsx from "clsx";
 import { keyToName } from "../functions/FunctionLibrary";
 import type { CharacterState } from "../data/Characters";
-import { entries } from "mobx";
 import {
   Zap,
   Brain,
@@ -53,11 +52,10 @@ const stateDescriptions: Partial<Record<keyof CharacterState, string>> = {
 };
 
 export function CharacterStateList({ state }: StateListProps) {
+  // Only show Overskudd - hide all other stats
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {entries(state).map(([key, value]) => (
-        <CharacterStateView key={key} name={key} value={value} />
-      ))}
+      <CharacterStateView name="overskudd" value={state.overskudd} />
     </div>
   );
 }
@@ -67,15 +65,17 @@ export function CharacterStateView({ name, value }: StateViewProps) {
   const description = stateDescriptions[name as keyof CharacterState];
   const isLow = value <= 20;
   const isMedium = value > 20 && value <= 60;
-  const isHigh = value > 60;
+  const isNegative = value < 0;
 
   const getStatusColor = () => {
+    if (isNegative) return "text-error";
     if (isLow) return "text-error";
     if (isMedium) return "text-warning";
     return "text-success";
   };
 
   const getProgressColor = () => {
+    if (isNegative) return "progress-error";
     if (isLow) return "progress-error";
     if (isMedium) return "progress-warning";
     return "progress-success";
@@ -92,7 +92,11 @@ export function CharacterStateView({ name, value }: StateViewProps) {
             </span>
           </div>
           <div className={clsx("badge badge-lg", getStatusColor())}>
-            {Math.round(value)}/100
+            {isNegative ? (
+              <span className="text-error">{value.toFixed(1)}</span>
+            ) : (
+              <span>{Math.round(value)}/100</span>
+            )}
           </div>
         </div>
 
@@ -102,24 +106,25 @@ export function CharacterStateView({ name, value }: StateViewProps) {
 
         <progress
           className={clsx("progress w-full h-3", getProgressColor())}
-          value={value}
+          value={isNegative ? 0 : Math.min(100, Math.max(0, value))}
           max={100}
         />
 
-        {isLow && (
+        {isNegative && name === "overskudd" && (
           <div className="alert alert-error alert-sm mt-2">
             <AlertTriangle className="size-4" />
             <span className="text-xs">
-              {name === "energy" && "Low energy! Rest or eat to recover."}
-              {name === "will" && "Low willpower! Take a break."}
-              {name === "attention" && "Low attention! Rest your mind."}
+              Overskudd is negative! Activities will stop automatically.
+            </span>
+          </div>
+        )}
+
+        {isLow && !isNegative && (
+          <div className="alert alert-error alert-sm mt-2">
+            <AlertTriangle className="size-4" />
+            <span className="text-xs">
               {name === "overskudd" &&
                 "Low overskudd! You need mental rest."}
-              {name === "mood" && "Low mood! Take care of yourself."}
-              {name === "security" && "Low security! Build stability."}
-              {!["energy", "will", "attention", "overskudd", "mood", "security"].includes(
-                name,
-              ) && "This resource is critically low!"}
             </span>
           </div>
         )}
