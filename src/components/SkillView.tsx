@@ -53,15 +53,42 @@ export const SkillView = observer(function SkillView({ skill }: Props) {
     >
       <div className="flex justify-between">
         <h3 className="mb-1">{characterSkill.name}</h3>
-        <div>{characterSkill.level}</div>
+        <div className="badge badge-primary">Level {characterSkill.level}</div>
       </div>
       <p className="mb-2 text-xs">{characterSkill.description}</p>
-      <button className="btn" onClick={() => characterSkill.decreaseSkill()}>
-        -
-      </button>
-      <button className="btn" onClick={() => characterSkill.increaseSkill()}>
-        +
-      </button>
+
+      {/* Experience Progress */}
+      {characterSkill.level < 10 && (
+        <div className="mb-2">
+          <div className="flex justify-between text-xs mb-1">
+            <span>Experience: {Math.floor(characterSkill.experience)}</span>
+            <span>
+              {characterSkill.getExperienceForNextLevel()} to next level
+            </span>
+          </div>
+          <progress
+            className="progress progress-primary h-2"
+            value={characterSkill.getProgressToNextLevel()}
+            max={100}
+          />
+        </div>
+      )}
+
+      {/* Manual level controls (for testing) */}
+      <div className="flex gap-2">
+        <button
+          className="btn btn-sm"
+          onClick={() => characterSkill.decreaseSkill()}
+        >
+          -
+        </button>
+        <button
+          className="btn btn-sm"
+          onClick={() => characterSkill.increaseSkill()}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 });

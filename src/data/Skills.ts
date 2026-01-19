@@ -6,6 +6,7 @@ export class ASkill {
   category: SkillCategory;
   tier: SkillTier;
   level = 0; // determines the cost and output
+  experience = 0; // current experience points
   description: string;
   requirements: Array<SkillRequirement>;
   skillLevelThresholds = [
@@ -36,18 +37,72 @@ export class ASkill {
   }
 
   clone() {
-    return new ASkill(this.id, { ...this });
+    const cloned = new ASkill(this.id, { ...this });
+    cloned.level = this.level;
+    cloned.experience = this.experience;
+    return cloned;
+  }
+
+  /**
+   * Add experience to this skill
+   * Returns true if level increased
+   */
+  addExperience(amount: number): boolean {
+    if (this.level >= 10) {
+      return false; // Max level reached
+    }
+
+    this.experience += amount;
+    const oldLevel = this.level;
+
+    // Check if we've reached a new level threshold
+    for (let i = this.skillLevelThresholds.length - 1; i >= 0; i--) {
+      if (this.experience >= this.skillLevelThresholds[i]) {
+        this.level = i;
+        break;
+      }
+    }
+
+    return this.level > oldLevel;
+  }
+
+  /**
+   * Get experience needed for next level
+   */
+  getExperienceForNextLevel(): number {
+    if (this.level >= 10) {
+      return 0; // Max level
+    }
+    return this.skillLevelThresholds[this.level + 1] - this.experience;
+  }
+
+  /**
+   * Get progress percentage to next level
+   */
+  getProgressToNextLevel(): number {
+    if (this.level >= 10) {
+      return 100;
+    }
+    const currentThreshold = this.skillLevelThresholds[this.level];
+    const nextThreshold = this.skillLevelThresholds[this.level + 1];
+    const range = nextThreshold - currentThreshold;
+    const progress = this.experience - currentThreshold;
+    return Math.min(100, (progress / range) * 100);
   }
 
   increaseSkill() {
     if (this.level < 10) {
       this.level++;
+      // Set experience to the threshold for this level
+      this.experience = this.skillLevelThresholds[this.level];
     }
   }
 
   decreaseSkill() {
     if (this.level > 0) {
       this.level--;
+      // Set experience to the threshold for this level
+      this.experience = this.skillLevelThresholds[this.level];
     }
   }
 }

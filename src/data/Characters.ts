@@ -1,6 +1,6 @@
 import { action, makeAutoObservable } from "mobx";
 import { getGameState } from "../GameState";
-import type { AActivity } from "./Activities";
+import type { AActivity, ActivityCosts } from "./Activities";
 import {
   calculateReward,
   calculateResonance,
@@ -131,6 +131,8 @@ export class ACharacter {
   overskudd = 30;
   baseOverskuddRegen = 2.0;
   interests: string[];
+  // Track mastery per activity (activityId -> mastery points)
+  activityMastery: Map<string, number> = new Map();
 
   description?: string;
   recentRewards = Array<{
@@ -161,6 +163,115 @@ export class ACharacter {
     return Math.max(0.1, regen); // Minimum 0.1/hour
   }
 
+  /**
+   * Update character state over time (passive regeneration)
+   * Called every game update tick
+   */
+  updateState(deltaTimeHours: number) {
+    // Overskudd regeneration (already calculated)
+    const overskuddRegen = this.overskuddRegen * deltaTimeHours;
+    this.state.overskudd = Math.min(100, this.state.overskudd + overskuddRegen);
+
+    // Energy regeneration based on nutrition and rest
+    const energyRegenBase = 5; // per hour
+    let energyRegen = energyRegenBase;
+    // Nutrition affects energy regen: -30% to +50%
+    const nutritionModifier = ((this.state.nutrition - 50) / 50) * 0.5;
+    energyRegen *= 1 + nutritionModifier;
+    // If not doing activity, regen faster
+    if (!this.currentActivity) {
+      energyRegen *= 1.5;
+    }
+    this.state.energy = Math.min(100, this.state.energy + energyRegen * deltaTimeHours);
+
+    // Will regeneration based on mood and security
+    const willRegenBase = 2; // per hour
+    let willRegen = willRegenBase;
+    // Mood affects will regen: -40% to +40%
+    const moodModifier = ((this.state.mood - 50) / 50) * 0.4;
+    willRegen *= 1 + moodModifier;
+    // Security affects will regen: -20% to +30%
+    const securityModifier = ((this.state.security - 50) / 50) * 0.3;
+    willRegen *= 1 + securityModifier;
+    this.state.will = Math.min(100, this.state.will + willRegen * deltaTimeHours);
+
+    // Attention regeneration based on flow and rest
+    const attentionRegenBase = 3; // per hour
+    let attentionRegen = attentionRegenBase;
+    // Flow affects attention regen: +0% to +100%
+    attentionRegen *= 1 + this.state.flow / 100;
+    // If not doing activity, regen faster
+    if (!this.currentActivity) {
+      attentionRegen *= 1.3;
+    }
+    this.state.attention = Math.min(100, this.state.attention + attentionRegen * deltaTimeHours);
+
+    // Mental capacity regeneration
+    const mentalCapacityRegenBase = 4; // per hour
+    let mentalCapacityRegen = mentalCapacityRegenBase;
+    // Energy affects mental capacity regen: -30% to +30%
+    const energyModifier = ((this.state.energy - 50) / 50) * 0.3;
+    mentalCapacityRegen *= 1 + energyModifier;
+    // If not doing activity, regen faster
+    if (!this.currentActivity) {
+      mentalCapacityRegen *= 1.4;
+    }
+    this.state.mentalCapacity = Math.min(
+      100,
+      this.state.mentalCapacity + mentalCapacityRegen * deltaTimeHours,
+    );
+
+    // Social battery regeneration based on extraversion
+    const socialBatteryRegenBase = 2; // per hour
+    let socialBatteryRegen = socialBatteryRegenBase;
+    // Extraversion affects regen: introverts regen faster when alone, extroverts slower
+    const extraversionModifier = (this.traits.extraversion - 50) / 50;
+    if (!this.currentActivity || this.currentActivity.mentalSignature.extraversion < 30) {
+      // Alone or low-social activity
+      socialBatteryRegen *= 1 + extraversionModifier * 0.5; // Introverts regen faster
+    } else {
+      // Social activity
+      socialBatteryRegen *= 1 - extraversionModifier * 0.3; // Extroverts regen slower (they're using it)
+    }
+    this.state.socialBattery = Math.min(
+      100,
+      this.state.socialBattery + socialBatteryRegen * deltaTimeHours,
+    );
+
+    // Nutrition decay (slowly decreases over time)
+    const nutritionDecay = 0.5; // per hour
+    this.state.nutrition = Math.max(0, this.state.nutrition - nutritionDecay * deltaTimeHours);
+
+    // Mood update based on multiple factors
+    const moodChangeBase = 0.2; // per hour (tends toward neutral)
+    let moodChange = (50 - this.state.mood) * moodChangeBase * deltaTimeHours;
+    // Energy affects mood: low energy = worse mood
+    if (this.state.energy < 30) {
+      moodChange -= 0.5 * deltaTimeHours;
+    } else if (this.state.energy > 70) {
+      moodChange += 0.3 * deltaTimeHours;
+    }
+    // Security affects mood
+    if (this.state.security < 30) {
+      moodChange -= 0.3 * deltaTimeHours;
+    } else if (this.state.security > 70) {
+      moodChange += 0.2 * deltaTimeHours;
+    }
+    this.state.mood = Math.max(0, Math.min(100, this.state.mood + moodChange));
+
+    // Flow decay (slowly decreases)
+    const flowDecay = 0.3; // per hour
+    this.state.flow = Math.max(0, this.state.flow - flowDecay * deltaTimeHours);
+
+    // Purpose decay (slowly decreases)
+    const purposeDecay = 0.1; // per hour
+    this.state.purpose = Math.max(0, this.state.purpose - purposeDecay * deltaTimeHours);
+
+    // Security decay (slowly decreases)
+    const securityDecay = 0.2; // per hour
+    this.state.security = Math.max(0, this.state.security - securityDecay * deltaTimeHours);
+  }
+
   constructor(
     name: string,
     { color, interests, traits, description }: Omit<CharacterData, "name">,
@@ -175,6 +286,151 @@ export class ACharacter {
     this.description = description;
   }
 
+  /**
+   * Check if character can afford the activity costs
+   */
+  canAffordActivity(activity: AActivity): { can: boolean; reason?: string } {
+    const costs = activity.getEffectiveCosts(this);
+
+    // Check each cost
+    if (costs.energy && this.state.energy < costs.energy) {
+      return { can: false, reason: `Not enough energy (need ${costs.energy})` };
+    }
+    if (costs.will && this.state.will < costs.will) {
+      return { can: false, reason: `Not enough will (need ${costs.will})` };
+    }
+    if (costs.attention && this.state.attention < costs.attention) {
+      return {
+        can: false,
+        reason: `Not enough attention (need ${costs.attention})`,
+      };
+    }
+    if (costs.overskudd && this.state.overskudd < costs.overskudd) {
+      return {
+        can: false,
+        reason: `Not enough overskudd (need ${costs.overskudd})`,
+      };
+    }
+    if (
+      costs.mentalCapacity &&
+      this.state.mentalCapacity < costs.mentalCapacity
+    ) {
+      return {
+        can: false,
+        reason: `Not enough mental capacity (need ${costs.mentalCapacity})`,
+      };
+    }
+    if (costs.socialBattery && this.state.socialBattery < costs.socialBattery) {
+      return {
+        can: false,
+        reason: `Not enough social battery (need ${costs.socialBattery})`,
+      };
+    }
+
+    return { can: true };
+  }
+
+  /**
+   * Consume activity costs
+   */
+  private consumeActivityCosts(costs: ActivityCosts) {
+    if (costs.energy) {
+      this.state.energy = Math.max(0, this.state.energy - costs.energy);
+    }
+    if (costs.will) {
+      this.state.will = Math.max(0, this.state.will - costs.will);
+    }
+    if (costs.attention) {
+      this.state.attention = Math.max(0, this.state.attention - costs.attention);
+    }
+    if (costs.overskudd) {
+      this.state.overskudd = Math.max(0, this.state.overskudd - costs.overskudd);
+    }
+    if (costs.mentalCapacity) {
+      this.state.mentalCapacity = Math.max(
+        0,
+        this.state.mentalCapacity - costs.mentalCapacity,
+      );
+    }
+    if (costs.socialBattery) {
+      this.state.socialBattery = Math.max(
+        0,
+        this.state.socialBattery - costs.socialBattery,
+      );
+    }
+  }
+
+  /**
+   * Get mastery level for an activity
+   */
+  getActivityMastery(activity: AActivity): number {
+    return this.activityMastery.get(activity.id) || 0;
+  }
+
+  /**
+   * Get mastery level (0-10) for an activity
+   */
+  getActivityMasteryLevel(activity: AActivity): number {
+    const mastery = this.getActivityMastery(activity);
+    const thresholds = activity.masteryThresholds;
+    for (let i = thresholds.length - 1; i >= 0; i--) {
+      if (mastery >= thresholds[i]) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * Grant mastery points for completing an activity
+   */
+  private grantActivityMastery(activity: AActivity, resonance: number) {
+    const baseMastery = 0.5; // Base mastery per activity tick
+    const resonanceMultiplier = 0.5 + resonance * 0.5; // Better resonance = more mastery
+    const masteryGain = baseMastery * resonanceMultiplier;
+
+    const currentMastery = this.getActivityMastery(activity);
+    this.activityMastery.set(activity.id, currentMastery + masteryGain);
+  }
+
+  /**
+   * Grant experience to skills based on activity performance
+   */
+  private grantSkillExperience(activity: AActivity, resonance: number) {
+    const baseExperience = 1; // Base experience per activity tick
+    const resonanceMultiplier = 0.5 + resonance * 0.5; // 0.5x to 1.0x based on resonance
+    const flowMultiplier = 1 + this.state.flow / 100; // Flow increases experience gain
+
+    const experienceGain = baseExperience * resonanceMultiplier * flowMultiplier;
+
+    // Grant experience to required skills
+    activity.requiredSkills.forEach((req) => {
+      const skill = this.getSkill(req.id);
+      if (skill) {
+        const leveledUp = skill.addExperience(experienceGain * 2); // 2x for required skills
+        if (leveledUp) {
+          // Skill leveled up! Could trigger notification here
+        }
+      }
+    });
+
+    // Grant experience to recommended skills (less than required)
+    activity.recomendedSkills.forEach((rec) => {
+      const skill = this.getSkill(rec.id);
+      if (skill) {
+        skill.addExperience(experienceGain * 1.2); // 1.2x for recommended skills
+      }
+    });
+
+    // Grant experience to skills in the lol field (bonus skills)
+    Object.entries(activity.lol || {}).forEach(([skillId, multiplier]) => {
+      const skill = this.getSkill(skillId as SkillID);
+      if (skill) {
+        skill.addExperience(experienceGain * multiplier);
+      }
+    });
+  }
+
   doActivity(activity: AActivity) {
     if (
       this.gameState.time - activity.previousIntervalTime <
@@ -182,6 +438,17 @@ export class ACharacter {
     ) {
       return;
     }
+
+    // Check if can afford
+    const affordCheck = this.canAffordActivity(activity);
+    if (!affordCheck.can) {
+      return; // Silently fail if can't afford
+    }
+
+    // Consume costs
+    const costs = activity.getEffectiveCosts(this);
+    this.consumeActivityCosts(costs);
+
     this.currentActivity = activity;
     activity.previousIntervalTime = this.gameState.time;
 
@@ -190,7 +457,27 @@ export class ACharacter {
       this.traits,
       activity.mentalSignature,
     );
-    const [resource, amount] = calculateReward(this, activity, resonance);
+    const [resource, baseAmount] = calculateReward(this, activity, resonance);
+
+    // Apply mastery multiplier to rewards
+    const masteryMultiplier = activity.getRewardMultiplier(this);
+    const amount = Math.floor(baseAmount * masteryMultiplier);
+
+    // Grant skill experience
+    this.grantSkillExperience(activity, resonance);
+
+    // Grant activity mastery
+    this.grantActivityMastery(activity, resonance);
+
+    // Increase flow based on resonance (good performance increases flow)
+    if (resonance > 0.7) {
+      this.state.flow = Math.min(100, this.state.flow + 0.5);
+    }
+
+    // Increase purpose slightly when doing meaningful activities
+    if (activity.baseDifficulty >= 5) {
+      this.state.purpose = Math.min(100, this.state.purpose + 0.1);
+    }
 
     this.gameState.addResoure(resource, amount);
     this.recentRewards.unshift({

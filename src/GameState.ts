@@ -41,6 +41,11 @@ export class AGameState {
       day: Math.floor(this.time / 24),
       time: this.time % 24,
     };
+
+    // Update all character states
+    this.characters.forEach((char) => {
+      char.updateState(deltaTime);
+    });
   }
 
   selectCharacter(char: ACharacter) {

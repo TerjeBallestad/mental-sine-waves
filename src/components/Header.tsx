@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { useGameState } from "../GameState";
 import { Pause, Play } from "lucide-react";
 import { ResourceDropdown } from "./ResourceDropdown";
+import { SaveLoadMenu } from "./SaveLoadMenu";
 
 type HeaderProps = {
   isRunning: boolean;
@@ -33,6 +34,7 @@ export function Header({ isRunning, setIsRunning }: HeaderProps) {
         </button>
       </div>
       <div className="navbar-end gap-6">
+        <SaveLoadMenu />
         <ResourceDropdown />
 
         <div className="flex items-stretch">
