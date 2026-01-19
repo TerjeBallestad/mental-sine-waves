@@ -220,7 +220,7 @@ export class ACharacter {
 
   canLearnSkill(skill: ASkill): boolean {
     return skill.requirements.every(
-      (req) => this.getSkillLevel(req.skill) >= req.level,
+      (req) => this.getSkillLevel(req.id) >= req.level,
     );
   }
 

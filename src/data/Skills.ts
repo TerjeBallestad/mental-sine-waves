@@ -8,6 +8,19 @@ export class ASkill {
   level = 0; // determines the cost and output
   description: string;
   requirements: Array<SkillRequirement>;
+  skillLevelThresholds = [
+    0, // Level 0 (untrained)
+    100, // Level 1 (novice)
+    250, // Level 2 (beginner)
+    500, // Level 3 (competent)
+    1000, // Level 4 (proficient)
+    2000, // Level 5 (skilled)
+    4000, // Level 6 (expert)
+    7000, // Level 7 (master)
+    11000, // Level 8 (grandmaster)
+    16000, // Level 9 (legendary)
+    22000, // Level 10 (transcendent)
+  ];
 
   constructor(
     id: SkillID,
@@ -133,126 +146,126 @@ export const AllSkills = {
     category: "analytical",
     name: "Logic",
     tier: 2,
-    requirements: [{ skill: "categorization", level: 3 }],
+    requirements: [{ id: "categorization", level: 3 }],
     description: "Formal reasoning, deduction, proofs",
   }),
   patternRecognition: new ASkill("patternRecognition", {
     category: "analytical",
     name: "PatternRecognition",
     tier: 2,
-    requirements: [{ skill: "observation", level: 3 }],
+    requirements: [{ id: "observation", level: 3 }],
     description: "Identifying trends, structures, regularities",
   }),
   classification: new ASkill("classification", {
     category: "analytical",
     name: "Classification",
     tier: 2,
-    requirements: [{ skill: "categorization", level: 3 }],
+    requirements: [{ id: "categorization", level: 3 }],
     description: "Systematic organization into groups",
   }),
   sequentialThinking: new ASkill("sequentialThinking", {
     category: "analytical",
     name: "SequentialThinking",
     tier: 2,
-    requirements: [{ skill: "observation", level: 3 }],
+    requirements: [{ id: "observation", level: 3 }],
     description: "Understanding order and steps",
   }),
   spatialReasoning: new ASkill("spatialReasoning", {
     category: "analytical",
     name: "SpatialReasoning",
     tier: 2,
-    requirements: [{ skill: "fineMotorControl", level: 3 }],
+    requirements: [{ id: "fineMotorControl", level: 3 }],
     description: "Mental manipulation of physical forms",
   }),
   numericalReasoning: new ASkill("numericalReasoning", {
     category: "analytical",
     name: "NumericalReasoning",
     tier: 2,
-    requirements: [{ skill: "categorization", level: 3 }],
+    requirements: [{ id: "categorization", level: 3 }],
     description: "Basic math operations",
   }),
   dataAnalysis: new ASkill("dataAnalysis", {
     category: "analytical",
     name: "DataAnalysis",
     tier: 2,
-    requirements: [{ skill: "numericalReasoning", level: 3 }],
+    requirements: [{ id: "numericalReasoning", level: 3 }],
     description: "Statistical and quantitative interpretation",
   }),
   planning: new ASkill("planning", {
     category: "organizational",
     name: "Planning",
     tier: 2,
-    requirements: [{ skill: "sequentialThinking", level: 3 }],
+    requirements: [{ id: "sequentialThinking", level: 3 }],
     description: "Creating effective strategies and schedules",
   }),
   timeManagement: new ASkill("timeManagement", {
     category: "organizational",
     name: "TimeManagement",
     tier: 2,
-    requirements: [{ skill: "sequentialThinking", level: 3 }],
+    requirements: [{ id: "sequentialThinking", level: 3 }],
     description: "Prioritizing and pacing work",
   }),
   documentation: new ASkill("documentation", {
     category: "organizational",
     name: "Documentation",
     tier: 2,
-    requirements: [{ skill: "symbolicRepresentation", level: 3 }],
+    requirements: [{ id: "symbolicRepresentation", level: 3 }],
     description: "Recording and systematizing information",
   }),
   artisticExpression: new ASkill("artisticExpression", {
     category: "creative",
     name: "ArtisticExpression",
     tier: 2,
-    requirements: [{ skill: "artisticObservation", level: 3 }],
+    requirements: [{ id: "artisticObservation", level: 3 }],
     description: "Creating aesthetic works",
   }),
   craftsmanship: new ASkill("craftsmanship", {
     category: "technical",
     name: "Craftsmanship",
     tier: 2,
-    requirements: [{ skill: "fineMotorControl", level: 3 }],
+    requirements: [{ id: "fineMotorControl", level: 3 }],
     description: "Creating physical objects with quality",
   }),
   toolMastery: new ASkill("toolMastery", {
     category: "technical",
     name: "ToolMastery",
     tier: 2,
-    requirements: [{ skill: "fineMotorControl", level: 3 }],
+    requirements: [{ id: "fineMotorControl", level: 3 }],
     description: "Expert use of instruments/equipment",
   }),
   leadership: new ASkill("leadership", {
     category: "social",
     name: "Leadership",
     tier: 2,
-    requirements: [{ skill: "cooperation", level: 3 }],
+    requirements: [{ id: "cooperation", level: 3 }],
     description: "Organizing and directing groups",
   }),
   teaching: new ASkill("teaching", {
     category: "social",
     name: "Teaching",
     tier: 2,
-    requirements: [{ skill: "communication", level: 3 }],
+    requirements: [{ id: "communication", level: 3 }],
     description: "Transferring knowledge effectively",
   }),
   collaboration: new ASkill("collaboration", {
     category: "social",
     name: "Collaboration",
     tier: 2,
-    requirements: [{ skill: "cooperation", level: 3 }],
+    requirements: [{ id: "cooperation", level: 3 }],
     description: "Deep teamwork and coordination",
   }),
   dexterity: new ASkill("dexterity", {
     category: "physical",
     name: "Dexterity",
     tier: 2,
-    requirements: [{ skill: "fineMotorControl", level: 3 }],
+    requirements: [{ id: "fineMotorControl", level: 3 }],
     description: "Hand-eye coordination, fine movements",
   }),
   agility: new ASkill("agility", {
     category: "physical",
     name: "Agility",
     tier: 2,
-    requirements: [{ skill: "grossMotorControl", level: 3 }],
+    requirements: [{ id: "grossMotorControl", level: 3 }],
     description: "Quick movements, balance",
   }),
 
@@ -261,119 +274,119 @@ export const AllSkills = {
     category: "analytical",
     name: "CriticalThinking",
     tier: 3,
-    requirements: [{ skill: "logic", level: 5 }],
+    requirements: [{ id: "logic", level: 5 }],
     description: "Evaluating arguments, finding flaws",
   }),
   hypotheticalReasoning: new ASkill("hypotheticalReasoning", {
     category: "analytical",
     name: "HypoticalReasoning",
     tier: 3,
-    requirements: [{ skill: "logic", level: 5 }],
+    requirements: [{ id: "logic", level: 5 }],
     description: "Thinking about 'what if'",
   }),
   systemAnalysis: new ASkill("systemAnalysis", {
     category: "analytical",
     name: "SystemAnalysis",
     tier: 3,
-    requirements: [{ skill: "patternRecognition", level: 5 }],
+    requirements: [{ id: "patternRecognition", level: 5 }],
     description: "Understanding complex interconnections",
   }),
   mathematics: new ASkill("mathematics", {
     category: "analytical",
     name: "Mathematics",
     tier: 3,
-    requirements: [{ skill: "dataAnalysis", level: 5 }],
+    requirements: [{ id: "dataAnalysis", level: 5 }],
     description: "Advanced quantitative reasoning",
   }),
   narrativeDesign: new ASkill("narrativeDesign", {
     category: "creative",
     name: "NarrativeDesign",
     tier: 3,
-    requirements: [{ skill: "artisticExpression", level: 5 }],
+    requirements: [{ id: "artisticExpression", level: 5 }],
     description: "Crafting compelling stories",
   }),
   musicalAbility: new ASkill("musicalAbility", {
     category: "creative",
     name: "MusicalAbility",
     tier: 3,
-    requirements: [{ skill: "artisticExpression", level: 5 }],
+    requirements: [{ id: "artisticExpression", level: 5 }],
     description: "Rhythm, harmony, composition",
   }),
   creativeSynthesis: new ASkill("creativeSynthesis", {
     category: "creative",
     name: "CreativeSynthesis",
     tier: 3,
-    requirements: [{ skill: "hypotheticalReasoning", level: 5 }],
+    requirements: [{ id: "hypotheticalReasoning", level: 5 }],
     description: "Combining concepts in novel ways",
   }),
   aestheticJudgement: new ASkill("aestheticJudgement", {
     category: "creative",
     name: "AestheticJudgement",
     tier: 3,
-    requirements: [{ skill: "criticalThinking", level: 5 }],
+    requirements: [{ id: "criticalThinking", level: 5 }],
     description: "Recognizing and creating beauty",
   }),
   negotiation: new ASkill("negotiation", {
     category: "social",
     name: "Negotiation",
     tier: 3,
-    requirements: [{ skill: "communication", level: 5 }],
+    requirements: [{ id: "communication", level: 5 }],
     description: "Finding mutually beneficial outcomes",
   }),
   persuasion: new ASkill("persuasion", {
     category: "social",
     name: "Persuasion",
     tier: 3,
-    requirements: [{ skill: "communication", level: 5 }],
+    requirements: [{ id: "communication", level: 5 }],
     description: "Influencing opinions and decisions",
   }),
   resourceManagement: new ASkill("resourceManagement", {
     category: "organizational",
     name: "ResourceManagement",
     tier: 3,
-    requirements: [{ skill: "planning", level: 5 }],
+    requirements: [{ id: "planning", level: 5 }],
     description: "Allocating limited assets optimally",
   }),
   delegation: new ASkill("delegation", {
     category: "organizational",
     name: "Delegation",
     tier: 3,
-    requirements: [{ skill: "leadership", level: 5 }],
+    requirements: [{ id: "leadership", level: 5 }],
     description: "Distributing tasks effectively",
   }),
   precisionWork: new ASkill("precisionWork", {
     category: "technical",
     name: "PrecisionWork",
     tier: 3,
-    requirements: [{ skill: "craftsmanship", level: 5 }],
+    requirements: [{ id: "craftsmanship", level: 5 }],
     description: "Exact physical execution",
   }),
   systemOperation: new ASkill("systemOperation", {
     category: "technical",
     name: "SystemOperation",
     tier: 3,
-    requirements: [{ skill: "toolMastery", level: 5 }],
+    requirements: [{ id: "toolMastery", level: 5 }],
     description: "Running complex machinery/software",
   }),
   troubleshooting: new ASkill("troubleshooting", {
     category: "technical",
     name: "Troubleshooting",
     tier: 3,
-    requirements: [{ skill: "systemAnalysis", level: 5 }],
+    requirements: [{ id: "systemAnalysis", level: 5 }],
     description: "Diagnosing and fixing problems",
   }),
   strength: new ASkill("strength", {
     category: "physical",
     name: "Strength",
     tier: 3,
-    requirements: [{ skill: "grossMotorControl", level: 5 }],
+    requirements: [{ id: "grossMotorControl", level: 5 }],
     description: "Force application, heavy work",
   }),
   endurance: new ASkill("endurance", {
     category: "physical",
     name: "Endurance",
     tier: 3,
-    requirements: [{ skill: "agility", level: 5 }],
+    requirements: [{ id: "agility", level: 5 }],
     description: "Sustained physical effort",
   }),
 
@@ -383,8 +396,8 @@ export const AllSkills = {
     name: "Engineering",
     tier: 3,
     requirements: [
-      { skill: "systemAnalysis", level: 7 },
-      { skill: "mathematics", level: 7 },
+      { id: "systemAnalysis", level: 7 },
+      { id: "mathematics", level: 7 },
     ],
     description: "Designing functional systems",
   }),
@@ -441,7 +454,7 @@ export const SkillCategoryLabels: Record<SkillCategory, string> = {
  * - Required: Tier 3 foundation skills at level 7+
  */
 type SkillTier = 1 | 2 | 3 | 4;
-export type SkillRequirement = { skill: SkillID; level: number };
+export type SkillRequirement = { id: SkillID; level: number };
 
 type SkillData = {
   name: string;

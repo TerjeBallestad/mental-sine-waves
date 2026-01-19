@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
-import type { CharacterTraits } from "./Characters";
+import type { ACharacter, CharacterTraits } from "./Characters";
 import type { Resource, ResourceData } from "./Resources";
-import type { SkillRequirement } from "./Skills";
+import type { SkillID, SkillRequirement } from "./Skills";
 
 export type ActivityData = {
   id: string;
@@ -14,6 +14,7 @@ export type ActivityData = {
   reward: Partial<Record<Resource, ResourceData>>;
   requiredSkills: SkillRequirement[];
   recomendedSkills: SkillRequirement[];
+  lol?: Partial<Record<SkillID, number>>;
 };
 
 export class AActivity implements ActivityData {
@@ -31,6 +32,20 @@ export class AActivity implements ActivityData {
   rewardInterval = 0.05; // 3 minutes
   mastery = 0; // determines mental adaption
   previousIntervalTime = 0;
+  lol: Partial<Record<SkillID, number>> | undefined;
+  masteryThresholds = [
+    0, // Level 0 (untrained)
+    100, // Level 1 (novice)
+    250, // Level 2 (beginner)
+    500, // Level 3 (competent)
+    1000, // Level 4 (proficient)
+    2000, // Level 5 (skilled)
+    4000, // Level 6 (expert)
+    7000, // Level 7 (master)
+    11000, // Level 8 (grandmaster)
+    16000, // Level 9 (legendary)
+    22000, // Level 10 (transcendent)
+  ];
 
   get intervalTime() {
     if (typeof this.timeToComplete === "number") {
@@ -40,11 +55,27 @@ export class AActivity implements ActivityData {
   }
 
   /**
-   * Calculates
+   * Calculates the effective difficulty of the activity, factoring in required and recommended skills.
    */
-  getDifficulty(): number {
+  getDifficulty(character: ACharacter): number {
     let difficulty = this.baseDifficulty;
-    difficulty *= 0.2;
+    this.requiredSkills.forEach((req) => {
+      const charSkillLevel = character.getSkillLevel(req.id);
+      if (charSkillLevel < req.level) {
+        difficulty -= (req.level - charSkillLevel) * 2; // Penalty for lacking required skills
+      }
+      // let tierPenalty = Math.pow(0.85, req.skill.tier - 1);
+    });
+    this.recomendedSkills.forEach((rec) => {
+      const charSkillLevel = character.getSkillLevel(rec.id);
+      if (charSkillLevel < rec.level) {
+        difficulty -= rec.level - charSkillLevel; // Smaller penalty for lacking recommended skills
+      }
+    });
+    Object.entries(this.lol || {}).forEach(([key, value]) => {
+      const charSkillLevel = character.getSkillLevel(key as SkillID);
+      difficulty -= charSkillLevel * value;
+    });
     return difficulty;
   }
 
@@ -132,7 +163,7 @@ export const community = new AActivity("Community Outreach", {
   },
   interestBonus: ["helping", "social-dynamics"],
   description: "High energy, varied interactions",
-  requiredSkills: [{ skill: "communication", level: 3 }],
+  requiredSkills: [{ id: "communication", level: 3 }],
   recomendedSkills: [],
 });
 
@@ -164,8 +195,15 @@ export const creative = new AActivity("Creative Problem-Solving", {
   },
   interestBonus: ["self-discovery", "observation"],
   description: "Bursts of insight, unpredictable flow",
-  requiredSkills: [],
-  recomendedSkills: [],
+  requiredSkills: [
+    { id: "creativeSynthesis", level: 4 },
+    { id: "dataAnalysis", level: 2 },
+  ],
+  recomendedSkills: [
+    { id: "creativeSynthesis", level: 6 },
+    { id: "dataAnalysis", level: 4 },
+  ],
+  lol: { creativeSynthesis: 10, dataAnalysis: 5 },
 });
 
 export const minfulness = new AActivity("Mindfulness Meditation", {
